@@ -1,0 +1,12 @@
+/* Additions for the React app (the base design comes from styles.css). */
+dialog.modal .dlg { display: flex; flex-direction: column; max-height: calc(100vh - 40px); }
+dialog.modal form { display: block; max-height: none; }
+.form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+.err { color: var(--bad); font-weight: 500; margin: 10px 0 0; }
+.toasts { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: grid; gap: 8px; z-index: 50; max-width: calc(100vw - 32px); }
+.toast { background: #111; color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13.5px; box-shadow: 0 10px 30px rgba(0, 0, 0, .2); }
+.dev-switch { display: grid; gap: 4px; margin-top: 12px; font-size: 11px; color: var(--warn); }
+.dev-switch select { padding: 4px 6px; border: 1px dashed var(--warn); border-radius: 6px; background: #fff; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+tr.voided td.num { text-decoration: line-through; color: var(--muted); }
+.stack { display: grid; gap: 4px; }

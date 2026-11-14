@@ -1,0 +1,10 @@
+node_modules/
+dist/
+data/
+.env
+*.local
+*.db
+*.db-*
+# Never commit client data or import files
+*.csv
+*.xlsx

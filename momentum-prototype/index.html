@@ -1,0 +1,1897 @@
+<title>Momentum Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#C14B8A; --violet:#7952A5; --ink:#141216; --muted:#6b6670; --line:#ebe7ee; --soft:#faf8fb; --tint:#f6eff5;
+  --bg:#fff; --ok:#2f7d4f; --okbg:#e8f4ec; --warn:#9a5b00; --warnbg:#fff3e0; --bad:#b3261e; --badbg:#fdecea; --info:#5b3f86; --infobg:#f1ecf8;
+  --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+a{color:var(--violet)}
+h1,h2,h3,h4{margin:0;font-weight:600}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--violet);outline-offset:2px}
+.muted{color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Brand */
+.wordmark{font-family:Montserrat,Inter,sans-serif;font-weight:600;letter-spacing:.32em;color:#000;line-height:1}
+.byline{font-family:Allura,cursive;font-weight:400;line-height:1.1;background:linear-gradient(100deg,#8e2f63 0%,#C14B8A 20%,#f1bcd9 38%,#a77fd0 55%,#7952A5 72%,#d6c3ee 86%,#5b3a83 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tagline{color:var(--muted);letter-spacing:.04em}
+
+/* Login */
+.login{min-height:100vh;display:grid;place-items:center;padding:32px 16px}
+.login-card{width:100%;max-width:560px;text-align:center}
+.login .wordmark{font-size:clamp(34px,8vw,56px)}
+.login .byline{font-size:clamp(30px,6vw,40px);margin-top:6px}
+.login .tagline{margin-top:6px;font-size:15px}
+.qcard{margin:32px auto 28px;padding:22px 24px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#fff, var(--soft));position:relative}
+.qcard::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;border-radius:14px 14px 0 0;background:linear-gradient(90deg,var(--pink),var(--violet))}
+.qcard .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.qcard blockquote{margin:8px 0 0;font-size:19px;font-weight:500}
+.who{display:grid;gap:8px;text-align:left}
+.who button{text-align:left;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:var(--r);background:#fff;cursor:pointer}
+.who button:hover{border-color:var(--pink);background:var(--soft)}
+.who small{color:var(--muted)}
+.proto{font-size:12px;color:var(--muted);margin-top:18px}
+
+/* Shell */
+.shell{display:grid;grid-template-columns:252px 1fr;min-height:100vh}
+.side{border-right:1px solid var(--line);padding:22px 14px 18px;position:sticky;top:0;height:100vh;overflow:auto;background:#fff;display:flex;flex-direction:column}
+.brand{padding:0 8px 18px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.brand .wordmark{font-size:20px}
+.brand .byline{font-size:19px;margin-top:6px;white-space:nowrap}
+.navg{margin:12px 0 4px}
+.navg h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 8px 6px;display:flex;align-items:center;gap:6px}
+.lock{font-size:10px;letter-spacing:.04em;text-transform:none;padding:1px 6px;border-radius:99px;background:var(--infobg);color:var(--info)}
+.navg a{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;color:var(--ink);text-decoration:none}
+.navg a:hover{background:var(--soft)}
+.navg a.on{background:var(--tint);color:#000;font-weight:600;box-shadow:inset 3px 0 0 var(--pink)}
+.navsub{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--violet);padding:12px 10px 4px}
+.count{min-width:20px;padding:0 6px;border-radius:99px;background:var(--pink);color:#fff;font-size:11px;font-weight:600;text-align:center;line-height:18px}
+.side-foot{margin-top:auto;padding:14px 8px 0;border-top:1px solid var(--line)}
+.side-foot .me{font-weight:600}
+.side-foot .row{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+main{padding-block:26px 60px;padding-left:max(34px,env(safe-area-inset-left,0px));padding-right:max(34px,env(safe-area-inset-right,0px));min-width:0}
+.mbar{display:none;align-items:center;justify-content:space-between;padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:#fff;z-index:15}
+.mbar .wordmark{font-size:16px}
+.banner{font-size:12px;color:var(--info);background:var(--infobg);border-radius:8px;padding:7px 12px;margin-bottom:18px}
+.scrim{display:none}
+.hero-img{display:block;width:100%;max-width:100%;height:clamp(96px,16vw,190px);object-fit:cover;border-radius:14px;margin-bottom:20px;background:var(--tint)}
+.login-hero{display:block;width:100%;max-width:100%;height:clamp(110px,22vw,170px);object-fit:cover;border-radius:16px;margin-bottom:26px;background:var(--tint)}
+
+/* Page header */
+.ph{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.ph h1{font-size:24px;letter-spacing:-.01em}
+.ph p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.ph .acts{display:flex;gap:8px;flex-wrap:wrap}
+.crumb{font-size:12px;margin-bottom:6px}
+.crumb a{text-decoration:none}
+
+/* Controls */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:500;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:#d5cfd9;background:var(--soft)}
+.btn.primary{background:#111;border-color:#111;color:#fff}
+.btn.primary:hover{background:#2a2530}
+.btn.accent{background:linear-gradient(100deg,var(--pink),var(--violet));border:0;color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{padding:4px 10px;font-size:13px}
+.icon-btn{border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px;border-radius:6px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.toolbar input,.toolbar select{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.toolbar input[type=search]{min-width:220px;flex:1;max-width:360px}
+.toolbar label.chk{display:flex;gap:6px;align-items:center}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:14px}
+.tabs button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:5px 12px;cursor:pointer}
+.tabs button.on{background:#111;color:#fff;border-color:#111}
+
+/* Cards / tiles */
+.card{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fff;margin-bottom:16px}
+.card h3{font-size:15px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.tile{border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-decoration:none;color:inherit;display:block}
+a.tile:hover{border-color:var(--pink)}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font-size:22px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.tile .v.small{font-size:16px}
+.cols2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px}
+.cols2>*{min-width:0}
+.quote-card{background:linear-gradient(160deg,#fff 0%,var(--tint) 100%)}
+.quote-card blockquote{margin:0;font-size:20px;font-weight:500}
+.quote-card .byline{font-size:24px;margin-top:10px}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.empty{padding:22px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0}
+.warnbox{background:var(--warnbg);color:var(--warn);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px}
+.infobox{background:var(--infobg);color:var(--info);border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px}
+
+/* Table */
+.tblwrap{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;font-weight:600;color:var(--muted);background:var(--soft);white-space:nowrap}
+tbody tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td a.name{font-weight:600;text-decoration:none;color:var(--ink)}
+td a.name:hover{color:var(--pink)}
+tr.voided td{color:var(--muted)}
+tr.voided td.num{text-decoration:line-through}
+tr.overdue td:first-child{box-shadow:inset 3px 0 0 var(--bad)}
+.acts-cell{display:flex;gap:6px;justify-content:flex-end;align-items:center}
+tfoot td{font-weight:600;background:var(--soft);border-top:1px solid var(--line)}
+
+/* Pills */
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:500;background:var(--soft);color:var(--muted);border:1px solid var(--line);white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok);border-color:transparent}
+.pill.warn{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.pill.bad{background:var(--badbg);color:var(--bad);border-color:transparent}
+.pill.info{background:var(--infobg);color:var(--info);border-color:transparent}
+.pill.pink{background:#fbe9f3;color:#9b2f6c;border-color:transparent}
+.tags{display:flex;gap:4px;flex-wrap:wrap}
+
+/* Definition list */
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px 20px;margin:0}
+.dl dt{font-size:12px;color:var(--muted)}
+.dl dd{margin:2px 0 0;word-break:break-word}
+.dl-h{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);margin:18px 0 8px;font-weight:600}
+.dl-h:first-child{margin-top:0}
+
+/* Alerts */
+.alist{list-style:none;margin:0;padding:0}
+.alist li{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+.alist li:last-child{border-bottom:0}
+.alist .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);margin-top:7px;flex:none}
+.alist li.read .dot{background:var(--line)}
+.alist li.read .t{color:var(--muted);font-weight:500}
+.alist .t{font-weight:600}
+.alist .d{color:var(--muted);font-size:13px}
+.alist .grow{flex:1;min-width:0}
+.alist .btns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+
+/* Timeline */
+.tl{list-style:none;margin:0;padding:0}
+.tl li{padding:10px 0 10px 18px;border-left:2px solid var(--line);position:relative}
+.tl li::before{content:"";position:absolute;left:-6px;top:15px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--violet)}
+.tl .m{font-size:12px;color:var(--muted)}
+
+/* Calendar */
+.cal{overflow-x:auto}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:780px}
+.cal-grid .dow{background:var(--soft);font-size:12px;font-weight:600;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+.cal-grid .day{min-height:112px;padding:6px 8px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.cal-grid .day:nth-child(7n){border-right:0}
+.cal-grid .day.out{background:#fcfbfd;color:#b9b3bd}
+.cal-grid .day.today .n{background:#111;color:#fff;border-radius:99px;padding:0 7px}
+.cal-grid .n{font-size:12px;font-weight:600;display:inline-block;margin-bottom:4px}
+.chip{display:block;font-size:11.5px;padding:2px 6px;border-radius:5px;margin-bottom:3px;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink);background:var(--soft);border-left:3px solid var(--line)}
+.chip.campaign{border-left-color:var(--violet);background:var(--infobg)}
+.chip.work{border-left-color:#111}
+.chip.follow{border-left-color:var(--pink);background:#fbe9f3}
+.chip.firm{border-left-color:var(--warn);background:var(--warnbg)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:10px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+
+/* Forms */
+dialog.modal{border:0;border-radius:14px;padding:0;width:min(720px,calc(100vw - 32px));max-height:calc(100vh - 40px);box-shadow:0 20px 60px rgba(20,10,30,.25)}
+dialog.modal.narrow{width:min(480px,calc(100vw - 32px))}
+dialog::backdrop{background:rgba(20,14,26,.42)}
+dialog form{display:flex;flex-direction:column;max-height:calc(100vh - 40px)}
+dialog header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+dialog header h2{font-size:17px}
+dialog .body{padding:18px 20px;overflow:auto}
+dialog footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 20px;border-top:1px solid var(--line)}
+dialog .err{color:var(--bad);margin:0;padding:0 20px;font-weight:500}
+dialog .err:empty{display:none}
+dialog .err:not(:empty){padding-bottom:8px}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field.full,.fgrid .fh{grid-column:1/-1}
+.fgrid .fh{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);font-weight:600;margin-top:8px;padding-top:10px;border-top:1px solid var(--line)}
+.fgrid .fh:first-child{margin-top:0;padding-top:0;border-top:0}
+.field label,.field .lbl{font-size:12.5px;font-weight:500;color:#3b3540}
+.field .req{color:var(--pink)}
+.field input:not([type=checkbox]),.field select,.field textarea{padding:8px 10px;border:1px solid #ddd6e1;border-radius:8px;background:#fff;width:100%}
+.field textarea{resize:vertical;min-height:70px}
+.field small{color:var(--muted);font-size:12px}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;cursor:pointer}
+.multi{display:flex;flex-wrap:wrap;gap:6px 14px;padding:6px 0}
+.report-form .field{margin-bottom:12px}
+.report-form textarea{min-height:64px}
+
+@media (max-width:980px){.cols2{grid-template-columns:1fr}}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;inset:0 auto 0 0;width:280px;transform:translateX(-102%);transition:transform .2s;z-index:30;box-shadow:0 0 40px rgba(0,0,0,.12)}
+  .side.open{transform:none}
+  .scrim.on{display:block;position:fixed;inset:0;background:rgba(20,14,26,.3);z-index:25}
+  .mbar{display:flex}
+  main{padding-block:16px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .fgrid{grid-template-columns:1fr}
+  .toolbar input[type=search]{min-width:0;max-width:none;width:100%}
+}
+</style>
+<div id="app"></div>
+<script>
+'use strict';
+/* =====================================================================
+   Momentum — clickable prototype
+   Fictional sample data only, stored in this browser (localStorage).
+   No real sign-in and no server: access rules are simulated in the page.
+   ===================================================================== */
+
+const KEY = 'momentum-prototype-v2';
+const BRANDS = ['Law Girl', 'JD&Co', 'CBPLA', 'LendCheck', 'Lend Ready'];
+// Company divisions. Each staff member is granted the divisions they work on.
+const DIVISIONS = [
+  { id: 'jdco', name: 'JD&Co Law Firm' }, { id: 'marketing', name: 'Marketing' }, { id: 'lawgirl', name: 'Law Girl' },
+  { id: 'plstack', name: 'The Private Lenders Stack' }, { id: 'cbpla', name: 'CBPLA' }, { id: 'publishing', name: 'JD Publishing' },
+  { id: 'kitchen', name: 'JD in the Kitchen' }, { id: 'accounting', name: 'Accounting' },
+];
+const DIV = Object.fromEntries(DIVISIONS.map(d => [d.id, d]));
+// Only Jasmine can grant these divisions.
+const RESTRICTED = ['jdco', 'accounting', 'publishing'];
+// Document folders. Items are titles with Box links; a folder with no division is open to all staff.
+const FOLDERS = [
+  { id: 'hr', name: 'Human Resources', area: 'Office', div: null, hero: 'office', about: 'Policies, forms and staff documents.' },
+  { id: 'sops', name: 'SOPs & Templates', area: 'Office', div: null, hero: 'office', about: 'Standard operating procedures and reusable templates.' },
+  { id: 'pl-series', name: 'The Private Lenders Series', area: 'JD Publishing', div: 'publishing', hero: 'client-expenses', about: 'Manuscripts, drafts and production files for the series.' },
+  { id: 'lg-series', name: 'Law Girl Series', area: 'JD Publishing', div: 'publishing', hero: 'client-expenses', about: 'Manuscripts, drafts and production files for the series.' },
+  { id: 'cookbooks', name: 'JD in the Kitchen Cookbooks', area: 'JD Publishing', div: 'publishing', hero: 'client-expenses', about: 'Recipes, manuscripts and photography for the cookbooks.' },
+];
+const FOLDER = Object.fromEntries(FOLDERS.map(f => [f.id, f]));
+const CURS = ['CAD', 'USD'];
+const PIPES = {
+  'Software sales': ['Inquiry', 'Demo', 'Proposal', 'Negotiation', 'Won', 'Lost'],
+  'CBPLA memberships': ['Interested', 'Contacted', 'Application', 'Won', 'Lost'],
+  'Sponsorships': ['Prospect', 'Pitched', 'Negotiating', 'Won', 'Lost'],
+  'Partnerships': ['Exploring', 'Discussing', 'Agreement', 'Won', 'Lost'],
+  'Podcast and media': ['Idea', 'Invited', 'Scheduled', 'Won', 'Lost'],
+  'Speaking': ['Lead', 'Submitted', 'Confirmed', 'Won', 'Lost'],
+};
+const TASK_STATUS = ['Planned', 'In progress', 'Ready for review', 'Approved', 'Published', 'Completed'];
+const CHECKLIST = [
+  ['Conflicts', 'Conflict review recorded'],
+  ['Retainer', 'Signed retainer and scope reviewed'],
+  ['Client details', 'Client contact and identity details reviewed'],
+  ['Responsibility', 'File number, lawyer and staff assigned'],
+  ['Dates', 'Key dates reviewed by responsible lawyer'],
+  ['Notices', 'Notice requirements reviewed by responsible lawyer'],
+  ['Documents', 'File folder and document access prepared'],
+  ['Next steps', 'Initial records requests and next steps planned'],
+];
+const CASE_TYPES = ['Motor vehicle accident', 'Slip and fall', 'Long-term disability', 'Mortgage or lending dispute', 'Real estate', 'Employment', 'Other'];
+// Placeholder quote bank (31). The live app's bank lives in lib/policy.ts.
+const QUOTES = [
+  'Bold ambition creates limitless possibility.',
+  'Momentum is built one deliberate step at a time.',
+  'Small wins, repeated daily, become big results.',
+  'Clarity first. Speed follows.',
+  'Make the hard call before lunch.',
+  'Every follow-up is a promise kept.',
+  'Consistency outworks talent that rests.',
+  'Lead with care; close with confidence.',
+  'Progress loves a plan and a deadline.',
+  'Make it simple, then make it happen.',
+  'Your next client is one conversation away.',
+  'Ambition is a decision you make every morning.',
+  'Done well beats done perfectly.',
+  'Be the reason someone’s day gets easier.',
+  'Great teams share the load and the credit.',
+  'Start before you feel ready.',
+  'Details build trust.',
+  'Focus means saying no to the good for the great.',
+  'Energy is contagious. Bring yours.',
+  'Momentum favours the prepared.',
+  'Turn every no into a next step.',
+  'Show up, follow through, lift others.',
+  'Big goals need small daily rituals.',
+  'The best time to follow up is now.',
+  'Confidence comes from doing the work.',
+  'Courage is the first line item of growth.',
+  'Excellence is a habit, not an event.',
+  'Write it down. Then get it done.',
+  'Momentum is a team sport.',
+  'Finish strong; tomorrow starts tonight.',
+  'Keep going. You are closer than you think.',
+];
+
+/* ---------- small helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'id-' + Math.random().toString(36).slice(2) + Date.now().toString(36));
+const nowISO = () => new Date().toISOString();
+const nyFmt = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' });
+const today = () => nyFmt.format(new Date());
+const nyHour = () => Number(new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23' }).format(new Date()));
+function shift(ds, n) { const d = new Date(ds + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+const addDays = n => shift(today(), n);
+const dow = ds => new Date(ds + 'T00:00:00Z').getUTCDay(); // 0 = Sunday
+const mondayOf = ds => shift(ds, -((dow(ds) + 6) % 7));
+const isDate = s => /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(new Date(s + 'T00:00:00Z'));
+const fmtDate = d => d ? new Date(d + 'T12:00:00Z').toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '—';
+const fmtDT = iso => iso ? new Date(iso).toLocaleString('en-CA', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+const fmtMonth = ym => new Date(ym + '-15T12:00:00Z').toLocaleDateString('en-CA', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+const money = (c, cur = 'CAD') => ((c || 0) / 100).toLocaleString('en-CA', { style: 'currency', currency: cur });
+const parseMoney = s => { const n = Number(String(s).replace(/[^0-9.\-]/g, '')); return String(s).trim() === '' || !isFinite(n) ? NaN : Math.round(n * 100); };
+const curList = o => { const e = Object.entries(o).filter(([, v]) => v); return e.length ? e.map(([k, v]) => money(v, k)).join(' · ') : money(0); };
+const localNow = () => { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); };
+const first = n => String(n).split(' ')[0];
+const slug = s => String(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const ext = (url, label = 'Open') => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)} ↗</a>` : '<span class="muted">—</span>';
+const pill = (t, cls = '') => `<span class="pill ${cls}">${esc(t)}</span>`;
+const empty = t => `<div class="empty">${esc(t)}</div>`;
+function dl(pairs) { return `<dl class="dl">${pairs.filter(Boolean).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v === undefined || v === null || v === '' ? '<span class="muted">—</span>' : v}</dd></div>`).join('')}</dl>`; }
+// Shared pages can't start file downloads, so show the content with a Copy button instead.
+function download(name, text) {
+  modal(name, `<textarea id="dl-text" readonly rows="14" aria-label="${esc(name)}" style="width:100%;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;padding:10px;border:1px solid var(--line);border-radius:8px">${esc(text)}</textarea><p class="note">Copy this and paste it into a file or spreadsheet.</p>`, { extraButtons: btn('Copy', 'copy', { text }) });
+}
+const STATUS_CLS = {
+  'Open': 'ok', 'Active': 'ok', 'Planning': 'info', 'Paused': 'warn', 'Completed': 'ok', 'Published': 'ok', 'Approved': 'ok',
+  'In progress': 'info', 'Ready for review': 'warn', 'Won': 'ok', 'Lost': 'bad', 'Unpaid': 'warn', 'Paid': 'ok', 'Reimbursed': 'ok',
+  'Submitted': 'info', 'Reconciled': 'ok', 'Voided': 'bad', 'Granted': 'ok', 'Declined': 'bad', 'Unsubscribed': 'bad',
+  'New': 'pink', 'Contacting': 'info', 'Consult booked': 'warn', 'Retained': 'ok', 'Referred': 'info', 'Complete': 'ok',
+  'Trial': 'warn', 'Draft': 'warn', 'Reviewed': 'ok', 'Urgent': 'bad', 'High': 'warn',
+  'Firm': 'info', 'Administrator': 'pink', 'Owner': 'pink', 'Ready': 'ok', 'Duplicate': 'warn', 'Error': 'bad', 'Committed': 'ok',
+};
+const sp = s => s ? pill(s, STATUS_CLS[s] || '') : '<span class="muted">—</span>';
+
+/* ---------- state ---------- */
+let S;
+const UI = {};
+function load() { try { const t = localStorage.getItem(KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* storage unavailable: keep working in memory */ } }
+const byId = (col, id) => S[col].find(r => r.id === id);
+const nameOf = (col, id, f = 'name') => esc(byId(col, id)?.[f] || '—');
+const memberName = id => nameOf('members', id);
+const me = () => { const m = S && byId('members', S.session); return m && m.active ? m : null; };
+const isAdmin = (m = me()) => !!m && (m.role === 'Owner' || m.role === 'Administrator');
+const isOwner = (m = me()) => !!m && m.role === 'Owner';
+const hasDiv = (d, m = me()) => !!m && (m.role === 'Owner' || (m.divisions || []).includes(d));
+const hasFirm = (m = me()) => hasDiv('jdco', m);
+const myDivisions = (m = me()) => DIVISIONS.filter(d => hasDiv(d.id, m));
+const activeMembers = firmOnly => S.members.filter(m => m.active && (!firmOnly || hasFirm(m)));
+const memberOpts = firmOnly => () => activeMembers(firmOnly).map(m => [m.id, m.name]);
+function log(action, entity, scope = 'general') {
+  S.audit.unshift({ id: uid(), at: nowISO(), actor: me()?.id, action, entity, scope });
+  if (S.audit.length > 300) S.audit.length = 300;
+}
+function upsert(col, rec) {
+  if (rec.id && byId(col, rec.id)) {
+    const i = S[col].findIndex(r => r.id === rec.id);
+    S[col][i] = { ...S[col][i], ...rec, updatedAt: nowISO(), updatedBy: me()?.id, rev: (S[col][i].rev || 0) + 1 };
+    save(); return S[col][i];
+  }
+  const r = { ...rec, id: rec.id || uid(), createdAt: nowISO(), createdBy: rec.createdBy || me()?.id, rev: 1 };
+  S[col].push(r); save(); return r;
+}
+
+/* ---------- seed data (all fictional) ---------- */
+function seed() {
+  const d = addDays, t = today();
+  const ago = (days, h = 10) => { const x = new Date(); x.setDate(x.getDate() - days); x.setHours(h, 15, 0, 0); return x.toISOString(); };
+  // Real team roster. Titles and sign-in emails are left blank for each person to fill in.
+  const M = (id, name, role = 'Member', divisions = ['marketing']) => ({ id, name, title: '', email: '', role, divisions, active: true, bound: false, rev: 1 });
+  return {
+    session: null,
+    divisionsV4: true, firmRosterV3: true, foldersV5: true,
+    folderItems: seedFolderItems(),
+    members: [
+      M('m1', 'Jasmine Daya', 'Owner', DIVISIONS.map(x => x.id)),
+      M('m2', 'Lorena Sanchez'),
+      M('m3', 'Javier Acosta'),
+      M('m4', 'Cristian Martinez', 'Member', ['marketing', 'publishing']),
+      M('m5', 'Jannelle Mercado Platon', 'Member', ['marketing', 'jdco', 'accounting']),
+      M('m6', 'Jome Lope'),
+      M('m7', 'Marvin Conson'),
+      M('m8', 'Mike Harlie', 'Member', ['marketing', 'jdco']),
+      M('m12', 'Nerissa Sison', 'Member', ['marketing', 'jdco']),
+      M('m9', 'Rachelle Barredo-Gajo'),
+      M('m10', 'Rheinel Roi Manalo'),
+      M('m11', 'Vera Dalian'),
+    ],
+    companies: [
+      { id: 'co1', name: 'Northbridge Lending', industry: 'Private lending', website: 'https://example.com/northbridge', brands: ['LendCheck', 'Lend Ready'], ownerId: 'm2', notes: 'Interested in a team licence.' },
+      { id: 'co2', name: 'Maple Realty Group', industry: 'Real estate brokerage', website: 'https://example.com/maple', brands: ['CBPLA'], ownerId: 'm4' },
+      { id: 'co3', name: 'Brightwave Media', industry: 'Podcast network', website: 'https://example.com/brightwave', brands: ['Law Girl'], ownerId: 'm1' },
+    ],
+    contacts: [
+      { id: 'ct1', name: 'Olivia Martin', email: 'olivia@northbridge.example', phone: '416-555-0141', companyId: 'co1', role: 'Operations lead', brands: ['LendCheck'], source: 'Website', ownerId: 'm2', emailPref: 'Granted', prefDate: d(-30), prefEvidence: 'Website form opt-in', campaignId: 'k1', nextAction: 'Send pricing for 10 seats', followUp: d(0), status: 'Active' },
+      { id: 'ct2', name: 'Ethan Wright', email: 'ethan@maple.example', phone: '905-555-0172', companyId: 'co2', role: 'Broker of record', brands: ['CBPLA'], source: 'Event', ownerId: 'm4', emailPref: 'Unknown', nextAction: 'Invite to member info session', followUp: d(-2), status: 'Active' },
+      { id: 'ct3', name: 'Grace Kim', email: 'grace@brightwave.example', phone: '647-555-0108', companyId: 'co3', role: 'Producer', brands: ['Law Girl'], source: 'Podcast', ownerId: 'm1', emailPref: 'Granted', prefDate: d(-60), prefEvidence: 'Verbal, logged on call', campaignId: 'k3', nextAction: 'Confirm recording date', followUp: d(3), status: 'Active' },
+      { id: 'ct4', name: 'Noah Patel', email: 'noah.patel@example.com', phone: '289-555-0190', brands: ['Lend Ready', 'LendCheck'], source: 'Referral', ownerId: 'm4', emailPref: 'Unknown', campaignId: 'k1', nextAction: 'Book product demo', followUp: d(1), status: 'Active' },
+      { id: 'ct5', name: 'Amelia Rossi', email: 'amelia@example.com', brands: ['CBPLA'], source: 'Social', ownerId: 'm2', emailPref: 'Declined', status: 'Archived' },
+    ],
+    opps: [
+      { id: 'o1', title: 'Northbridge team licence', pipeline: 'Software sales', stage: 'Proposal', contactId: 'ct1', companyId: 'co1', ownerId: 'm2', value: 1200000, currency: 'CAD', probability: 60, campaignId: 'k1', nextAction: 'Send revised proposal', followUp: d(2) },
+      { id: 'o2', title: 'Maple Realty group membership', pipeline: 'CBPLA memberships', stage: 'Contacted', contactId: 'ct2', companyId: 'co2', ownerId: 'm4', value: 450000, currency: 'CAD', probability: 30, nextAction: 'Follow up after info session', followUp: d(-1) },
+      { id: 'o3', title: 'Brightwave season sponsor', pipeline: 'Sponsorships', stage: 'Negotiating', contactId: 'ct3', companyId: 'co3', ownerId: 'm1', value: 800000, currency: 'USD', probability: 50, campaignId: 'k3', nextAction: 'Agree on episode count', followUp: d(5) },
+      { id: 'o4', title: 'Lend Ready solo plan', pipeline: 'Software sales', stage: 'Won', contactId: 'ct4', ownerId: 'm4', value: 49900, currency: 'CAD', probability: 100, campaignId: 'k1' },
+      { id: 'o5', title: 'Keynote at lending summit', pipeline: 'Speaking', stage: 'Lost', contactId: 'ct1', ownerId: 'm1', value: 300000, currency: 'CAD', probability: 0, lostReason: 'Date conflict with trial' },
+    ],
+    activities: [
+      { id: 'a1', at: ago(3), method: 'Call', direction: 'Outbound', outcome: 'Discussed seat count', notes: 'Wants pricing for 10.', contactId: 'ct1', oppId: 'o1', actor: 'm2' },
+      { id: 'a2', at: ago(2, 14), method: 'Email', direction: 'Outbound', outcome: 'Sent info session invite', contactId: 'ct2', oppId: 'o2', actor: 'm4' },
+      { id: 'a3', at: ago(6), kind: 'stage', outcome: 'Stage changed: Inquiry → Proposal', oppId: 'o1', contactId: 'ct1', actor: 'm2' },
+      { id: 'a4', at: ago(1, 16), method: 'Meeting', direction: 'Inbound', outcome: 'Sponsor terms call', contactId: 'ct3', oppId: 'o3', actor: 'm1' },
+    ],
+    campaigns: [
+      { id: 'k1', name: 'Fall LendCheck launch', brand: 'LendCheck', ownerId: 'm2', objective: 'Drive demo bookings from private lenders and brokers.', start: d(-20), end: d(25), status: 'Active', budget: 500000, currency: 'CAD', landingUrl: 'https://example.com/lendcheck', utmSource: 'linkedin', utmMedium: 'paid-social' },
+      { id: 'k2', name: 'CBPLA spring membership drive', brand: 'CBPLA', ownerId: 'm4', objective: 'Grow paid memberships ahead of the spring conference.', start: d(40), end: d(90), status: 'Planning', budget: 150000, currency: 'CAD' },
+      { id: 'k3', name: 'Law Girl podcast, season 3', brand: 'Law Girl', ownerId: 'm1', objective: 'Launch season 3 with a headline sponsor.', start: d(-10), end: d(60), status: 'Active', budget: 300000, currency: 'USD', landingUrl: 'https://example.com/podcast', utmSource: 'newsletter', utmMedium: 'email' },
+    ],
+    tasks: [
+      { id: 't1', title: 'LendCheck launch carousel', brand: 'LendCheck', type: 'Social post', assigneeId: 'm4', due: d(1), priority: 'High', status: 'Ready for review', campaignId: 'k1', brief: 'Five-slide carousel on faster lender checks.', creativeLink: 'https://example.com/canva/carousel' },
+      { id: 't2', title: 'Season 3 trailer audio edit', brand: 'Law Girl', type: 'Podcast', assigneeId: 'm2', due: d(-1), priority: 'Urgent', status: 'In progress', campaignId: 'k3' },
+      { id: 't3', title: 'CBPLA member newsletter', brand: 'CBPLA', type: 'Email', assigneeId: 'm4', due: d(6), priority: 'Normal', status: 'Planned' },
+      { id: 't4', title: 'Lend Ready onboarding blog', brand: 'Lend Ready', type: 'Blog', assigneeId: 'm3', due: d(-4), priority: 'Normal', status: 'Published', publishedLink: 'https://example.com/blog/onboarding' },
+      { id: 't5', title: 'Update office software inventory', brand: 'JD&Co', type: 'Admin', assigneeId: 'm1', due: d(0), priority: 'Low', status: 'Planned' },
+      { id: 't6', title: 'Speaker one-pager refresh', brand: 'Law Girl', type: 'Design', assigneeId: 'm3', due: d(9), priority: 'Normal', status: 'Approved' },
+    ],
+    reports: [
+      { id: 'r1', staffId: 'm4', kind: 'Weekly', scope: 'General', start: mondayOf(d(-7)), status: 'Submitted', completed: 'Sent CBPLA event follow-ups (14 contacts).', inProgress: 'Newsletter draft.', blockers: 'Waiting on sponsor logo.', decisions: 'Approve newsletter send date.', next: 'Info session prep.', counters: { tasksDone: 2, activities: 6, attempts: 0 }, savedAt: nowISO(), rev: 1 },
+      { id: 'r2', staffId: 'm2', kind: 'Daily', scope: 'General', start: t, status: 'Draft', completed: 'private draft text', rev: 1 },
+    ],
+    reminders: [
+      { id: 'rm1', title: 'Renew podcast hosting plan', due: d(0), assigneeId: 'm1', createdBy: 'm1', scope: 'General', status: 'Open' },
+    ],
+    alertStates: {},
+    programs: [
+      { id: 'p1', kind: 'marketing', provider: 'Canva', purpose: 'Design and social graphics', website: 'https://www.canva.com', signinUrl: 'https://www.canva.com/login', business: 'Law Girl', accountOwner: 'm2', accountLogin: 'marketing@example.com', users: 'Marketing team', vaultLink: 'https://vault.example.com/canva', billing: 'Annual', amount: 16500, currency: 'CAD', renewal: d(9), status: 'Active', visibility: 'General', createdBy: 'm2' },
+      { id: 'p2', kind: 'marketing', provider: 'SocialPilot', purpose: 'Social scheduling', website: 'https://www.socialpilot.co', business: 'LendCheck', accountOwner: 'm4', billing: 'Monthly', amount: 4200, currency: 'USD', renewal: d(22), status: 'Active', visibility: 'General', createdBy: 'm4' },
+      { id: 'p3', kind: 'office', provider: 'Practice management system', purpose: 'Matter management and billing', website: 'https://example.com/pms', business: 'JD&Co', accountOwner: 'm1', billing: 'Monthly', amount: 18900, currency: 'CAD', renewal: d(4), status: 'Active', visibility: 'Firm', createdBy: 'm1', accessInstructions: 'Ask Jasmine for a seat.' },
+      { id: 'p4', kind: 'office', provider: 'Microsoft 365', purpose: 'Email, calendar and documents', website: 'https://www.office.com', business: 'JD&Co', accountOwner: 'm1', billing: 'Annual', amount: 89900, currency: 'CAD', renewal: d(120), status: 'Active', visibility: 'General', createdBy: 'm1' },
+      { id: 'p5', kind: 'office', provider: 'Payroll service', purpose: 'Staff payroll', business: 'JD&Co', accountOwner: 'm1', billing: 'Monthly', amount: 7500, currency: 'CAD', renewal: d(15), status: 'Active', visibility: 'Administrator', createdBy: 'm1' },
+    ],
+    expenses: [
+      { id: 'e1', scope: 'marketing', date: d(-12), provider: 'LinkedIn Ads', description: 'Launch campaign, week 1', category: 'Advertising', ref: 'INV-20481', currency: 'CAD', amount: 75000, hst: 9750, receipt: 'https://example.com/r/1', payStatus: 'Paid', paidDate: d(-10), payMethod: 'Company card', bookStatus: 'Submitted', batchRef: 'OCT-A', brand: 'LendCheck', campaignId: 'k1', state: 'Recorded', createdBy: 'm2' },
+      { id: 'e2', scope: 'marketing', date: d(-5), provider: 'LinkedIn Ads', description: 'Launch campaign, week 2', category: 'Advertising', ref: 'INV-20533', currency: 'CAD', amount: 82000, hst: 10660, payStatus: 'Unpaid', bookStatus: 'Not submitted', brand: 'LendCheck', campaignId: 'k1', state: 'Recorded', createdBy: 'm2' },
+      { id: 'e3', scope: 'marketing', date: d(-8), provider: 'Audio studio', description: 'Trailer mix', category: 'Design', ref: '7731', currency: 'USD', amount: 40000, hst: 0, payStatus: 'Reimbursed', paidDate: d(-6), payMethod: 'Personal card', bookStatus: 'Reconciled', brand: 'Law Girl', campaignId: 'k3', state: 'Recorded', createdBy: 'm1' },
+      { id: 'e4', scope: 'marketing', date: d(-9), provider: 'Print shop', description: 'Event flyers', category: 'Printing', currency: 'CAD', amount: 12000, hst: 1560, payStatus: 'Unpaid', bookStatus: 'Not submitted', brand: 'CBPLA', state: 'Voided', voidReason: 'Entered twice.', createdBy: 'm4' },
+      { id: 'e5', scope: 'client', date: d(-7), provider: 'City Hospital records office', description: 'Clinical notes request', category: 'Medical records', ref: 'MR-118', currency: 'CAD', amount: 6500, hst: 845, payStatus: 'Paid', paidDate: d(-7), payMethod: 'Trust cheque', bookStatus: 'Submitted', matterId: 'mt1', state: 'Recorded', createdBy: 'm1' },
+      { id: 'e6', scope: 'client', date: d(-2), provider: 'Court registry', description: 'Statement of claim filing', category: 'Court and filing fees', currency: 'CAD', amount: 23500, hst: 0, payStatus: 'Unpaid', bookStatus: 'Not submitted', matterId: 'mt3', state: 'Recorded', createdBy: 'm1' },
+    ],
+    counsel: [
+      { id: 'l1', name: 'Jasmine Daya', firm: 'JD&Co', email: 'jasmine@example.com', practice: 'Personal injury, lending disputes', jurisdictions: 'Ontario' },
+      { id: 'l2', name: 'Avery Chen', firm: 'Chen Litigation', email: 'avery@example.com', phone: '416-555-0110', practice: 'Long-term disability', jurisdictions: 'Ontario, British Columbia', terms: 'Referral terms reviewed annually.' },
+      { id: 'l3', name: 'Rohan Mehta', firm: 'Mehta Real Estate Law', email: 'rohan@example.com', practice: 'Real estate, mortgage enforcement', jurisdictions: 'Ontario' },
+    ],
+    clients: [
+      { id: 'cl1', name: 'Leah Thompson', email: 'leah.t@example.com', phone: '416-555-0123', dob: '1986-04-12', address: '12 Example Street, Toronto ON', instructions: 'Text before calling; weekdays only.' },
+      { id: 'cl2', name: 'Victor Ramos', email: 'vramos@example.com', phone: '905-555-0156', dob: '1979-11-02', address: '88 Sample Avenue, Mississauga ON' },
+      { id: 'cl3', name: 'Mei Chen', email: 'mei.chen@example.com', phone: '647-555-0199', dob: '1992-07-25' },
+    ],
+    matters: [
+      { id: 'mt1', clientId: 'cl1', fileNumber: 'JD-2026-014', caseType: 'Motor vehicle accident', lossDate: '2026-03-08', lawyerId: 'l1', staffId: 'm1', status: 'Open', opened: '2026-03-20', boxLink: 'https://app.box.com/folder/example1' },
+      { id: 'mt2', clientId: 'cl1', fileNumber: 'JD-2024-031', caseType: 'Slip and fall', lossDate: '2023-12-02', lawyerId: 'l1', staffId: 'm1', status: 'Closed', opened: '2024-01-15', closed: '2025-09-30', closingReason: 'Settled' },
+      { id: 'mt3', clientId: 'cl2', fileNumber: 'JD-2026-022', caseType: 'Mortgage or lending dispute', lossDate: '2026-06-01', lawyerId: 'l1', staffId: 'm1', status: 'Open', opened: '2026-07-04' },
+      { id: 'mt4', clientId: 'cl3', fileNumber: 'JD-2026-027', caseType: 'Long-term disability', lossDate: '2026-05-14', lawyerId: 'l1', staffId: 'm1', status: 'Open', opened: d(-3) },
+    ],
+    pncs: [
+      { id: 'pn1', name: 'Jordan Ellis', phone: '416-555-0177', email: 'jordan.e@example.com', preferredContact: 'Phone', source: 'Google', caseType: 'Motor vehicle accident', lossDate: d(-40), firstContact: d(-6), intakeStaffId: 'm1', assignedStaffId: 'm1', summary: 'Rear-ended at a light; ongoing neck pain; insurer has called twice.', jurisdiction: 'Ontario', urgency: 'High', nextAction: 'Book consultation with Jasmine', followUp: d(0), status: 'Contacting' },
+      { id: 'pn2', name: 'Priyanka Shah', phone: '905-555-0133', email: 'p.shah@example.com', preferredContact: 'Email', source: 'Referral', referrer: 'Olivia Martin', caseType: 'Mortgage or lending dispute', lossDate: d(-90), firstContact: d(-14), intakeStaffId: 'm1', assignedStaffId: 'm1', summary: 'Lender demanding early repayment on a private second mortgage.', jurisdiction: 'Ontario', urgency: 'Urgent', propertyAddress: '45 Sample Crescent, Oakville ON', lendingCompany: 'Example Private Capital', loanAmount: 18500000, lenderOrBorrower: 'Borrower', closingDate: d(-400), nextAction: 'Review demand letter', followUp: d(2), noticeDate: d(12), verifiedBy: 'Jasmine Daya', verifiedBasis: 'Demand letter dated and reviewed', status: 'Consult booked' },
+      { id: 'pn3', name: 'Sam Wilson', phone: '647-555-0164', source: 'Website', caseType: 'Long-term disability', firstContact: d(-30), intakeStaffId: 'm1', assignedStaffId: 'm1', summary: 'LTD benefits denied after 2 years.', jurisdiction: 'British Columbia', urgency: 'Normal', status: 'Not retained', nonRetainerSent: d(-20), closingReason: 'Outside practice jurisdiction' },
+    ],
+    attempts: [
+      { id: 'at1', pncId: 'pn1', method: 'Call', at: ago(6, 11), outcome: 'Reached', notes: 'Initial intake call.', actor: 'm1' },
+      { id: 'at2', pncId: 'pn1', method: 'Voicemail', at: ago(2, 15), outcome: 'Left message', notes: 'Asked to call back to book consult.', actor: 'm1' },
+      { id: 'at3', pncId: 'pn2', method: 'Email', at: ago(13, 9), outcome: 'Reached', notes: 'Received demand letter copy.', actor: 'm1' },
+      { id: 'at4', pncId: 'pn2', method: 'Call', at: '2026-08-14T18:30:00Z', outcome: 'Reached', notes: 'Historical tracker entry.', actor: 'm1', importedStaff: 'Former intake clerk' },
+    ],
+    checklist: [],
+    batches: [],
+    divContacts: seedDivContacts(),
+    audit: [
+      { id: 'au1', at: ago(1, 9), actor: 'm2', action: 'Updated opportunity', entity: 'Northbridge team licence', scope: 'general' },
+      { id: 'au2', at: ago(1, 12), actor: 'm1', action: 'Logged contact attempt', entity: 'PNC: Jordan Ellis', scope: 'firm' },
+      { id: 'au3', at: ago(2, 10), actor: 'm4', action: 'Created work item', entity: 'CBPLA member newsletter', scope: 'general' },
+    ],
+  };
+}
+
+// Fictional example contacts so each division directory opens with something to show.
+function seedDivContacts() {
+  const C = (division, name, organization, role, email, phone, ownerId, nextAction = '', followUp = '') => ({ id: uid(), division, name, organization, role, email, phone, ownerId, nextAction, followUp, status: 'Active', createdBy: 'm1', rev: 1 });
+  return [
+    C('jdco', 'Dr. Alana Brooks', 'Example Physiotherapy Clinic', 'Treating physiotherapist', 'alana@clinic.example', '416-555-0201', 'm1', 'Request treatment notes', addDays(3)),
+    C('jdco', 'Owen Fraser', 'Example Insurance Co.', 'Adjuster', 'ofraser@insurer.example', '905-555-0202', 'm8'),
+    C('lawgirl', 'Tasha Green', 'Example Podcast Network', 'Booking producer', 'tasha@podcast.example', '', 'm1', 'Send guest one-pager', addDays(2)),
+    C('lawgirl', 'Marco Silva', 'Example Events Co.', 'Event organizer', 'marco@events.example', '647-555-0203', 'm2'),
+    C('plstack', 'Renee Holt', 'Example Mortgage Investment Corp.', 'Underwriting lead', 'renee@mic.example', '416-555-0204', 'm1', 'Schedule platform walkthrough', addDays(5)),
+    C('plstack', 'Kevin Osei', 'Independent private lender', 'Lender', 'kevin@lender.example', '', 'm4'),
+    C('cbpla', 'Priscilla Wong', 'Example Brokerage', 'Member', 'pwong@brokerage.example', '905-555-0205', 'm2', 'Confirm renewal', addDays(-1)),
+    C('cbpla', 'Daniel Mensah', 'Example Lending Group', 'Board member', 'dmensah@lending.example', '', 'm1'),
+    C('publishing', 'Ava Laurent', 'Example Press', 'Editor', 'ava@press.example', '', 'm1', 'Review manuscript notes', addDays(7)),
+    C('publishing', 'Sam Turner', 'Example Print House', 'Account manager', 'sam@print.example', '416-555-0206', 'm3'),
+    C('kitchen', 'Chef Nina Rossi', 'Example Culinary Studio', 'Recipe collaborator', 'nina@studio.example', '', 'm1', 'Plan holiday episode', addDays(4)),
+    C('kitchen', 'Leo Park', 'Example Kitchenware', 'Brand partnerships', 'leo@kitchenware.example', '', 'm6'),
+    C('accounting', 'Grace Okafor', 'Example Bookkeeping', 'Bookkeeper', 'grace@books.example', '416-555-0207', 'm1', 'Send October receipts', addDays(1)),
+    C('accounting', 'Henry Liu', 'Example CPA LLP', 'Accountant', 'henry@cpa.example', '', 'm1'),
+  ];
+}
+
+// Fictional example items so each folder opens with something to show.
+function seedFolderItems() {
+  const I = (folder, title, kind, status, ownerId, notes = '') => ({ id: uid(), folder, title, kind, status, ownerId, notes, link: '', createdBy: 'm1', updatedAt: nowISO(), rev: 1 });
+  return [
+    I('hr', 'Employee handbook (example)', 'Policy', 'Final', 'm1', 'Replace with the Box link to the current handbook.'),
+    I('hr', 'Time-off request form (example)', 'Form', 'Final', 'm1'),
+    I('sops', 'New client intake SOP (example)', 'Document', 'In review', 'm1'),
+    I('sops', 'Engagement letter template (example)', 'Template', 'Final', 'm1'),
+    I('pl-series', 'Book 1 manuscript (example)', 'Manuscript', 'Draft', 'm4'),
+    I('lg-series', 'Series outline (example)', 'Document', 'Draft', 'm1'),
+    I('cookbooks', 'Holiday recipes chapter (example)', 'Manuscript', 'In review', 'm4'),
+  ];
+}
+
+/* ---------- quote of the day (same for everyone on a New York business date) ---------- */
+function quoteToday() {
+  const days = Math.floor(Date.parse(today() + 'T00:00:00Z') / 86400000);
+  return QUOTES[((days % QUOTES.length) + QUOTES.length) % QUOTES.length];
+}
+
+/* ---------- forms ---------- */
+function fieldHtml(f, v) {
+  if (f.t === 'h') return `<div class="fh">${esc(f.l)}</div>`;
+  const id = 'f_' + f.k;
+  const opts = typeof f.o === 'function' ? f.o() : (f.o || []);
+  const lab = `<label for="${id}">${esc(f.l)}${f.req ? ' <span class="req" aria-hidden="true">*</span>' : ''}</label>`;
+  let input;
+  switch (f.t) {
+    case 'select':
+      input = `<select id="${id}" name="${f.k}"${f.req ? ' aria-required="true"' : ''}>${f.blank === false ? '' : `<option value="">${esc(f.ph || '—')}</option>`}${opts.map(o => { const [val, txt] = Array.isArray(o) ? o : [o, o]; return `<option value="${esc(val)}"${String(v ?? '') === String(val) ? ' selected' : ''}>${esc(txt)}</option>`; }).join('')}</select>`; break;
+    case 'textarea': input = `<textarea id="${id}" name="${f.k}" rows="${f.rows || 3}">${esc(v)}</textarea>`; break;
+    case 'money': input = `<input id="${id}" name="${f.k}" inputmode="decimal" placeholder="0.00" value="${v != null && v !== '' ? (v / 100).toFixed(2) : ''}">`; break;
+    case 'check': return `<div class="field${f.full ? ' full' : ''}"><span class="lbl">${esc(f.l)}${f.req ? ' <span class="req">*</span>' : ''}</span><label class="chk"><input type="checkbox" id="${id}" name="${f.k}"${v ? ' checked' : ''}> ${esc(f.cl || 'Yes')}</label>${f.help ? `<small>${esc(f.help)}</small>` : ''}</div>`;
+    case 'multi': return `<div class="field full"><span class="lbl">${esc(f.l)}${f.req ? ' <span class="req">*</span>' : ''}</span><div class="multi">${opts.map(o => { const [val, txt] = Array.isArray(o) ? o : [o, o]; return `<label class="chk"><input type="checkbox" name="${f.k}" value="${esc(val)}"${(v || []).includes(val) ? ' checked' : ''}> ${esc(txt)}</label>`; }).join('')}</div>${f.help ? `<small>${esc(f.help)}</small>` : ''}</div>`;
+    case 'datetime': input = `<input id="${id}" name="${f.k}" type="datetime-local" value="${esc(v)}">`; break;
+    default: input = `<input id="${id}" name="${f.k}" type="${f.t || 'text'}" value="${esc(v)}"${f.t === 'number' ? ' step="any"' : ''}>`;
+  }
+  return `<div class="field${f.full || f.t === 'textarea' ? ' full' : ''}">${lab}${input}${f.help ? `<small>${esc(f.help)}</small>` : ''}</div>`;
+}
+function collect(form, fields) {
+  const out = {};
+  for (const f of fields) {
+    if (f.t === 'h') continue;
+    if (f.t === 'check') out[f.k] = form.elements[f.k].checked;
+    else if (f.t === 'multi') out[f.k] = [...form.querySelectorAll(`input[name="${f.k}"]:checked`)].map(i => i.value);
+    else {
+      let v = form.elements[f.k].value.trim();
+      if (f.t === 'money') v = v === '' ? null : parseMoney(v);
+      if (f.t === 'number') v = v === '' ? null : Number(v);
+      out[f.k] = v;
+    }
+  }
+  return out;
+}
+function validate(fields, d) {
+  for (const f of fields) {
+    if (f.t === 'h') continue;
+    const v = d[f.k];
+    if (f.req && (v == null || v === '' || v === false || (Array.isArray(v) && !v.length))) return `${f.l} is required.`;
+    if (f.t === 'money' && v != null && isNaN(v)) return `${f.l} must be an amount, like 125.00.`;
+    if (f.t === 'money' && v != null && v < 0) return `${f.l} can’t be negative.`;
+    if (f.t === 'url' && v && !/^https:\/\/\S+$/i.test(v)) return `${f.l} must be an HTTPS link.`;
+    if (f.t === 'email' && v && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return `${f.l} must be a valid email address.`;
+    if (f.t === 'number' && v != null && isNaN(v)) return `${f.l} must be a number.`;
+  }
+}
+function modal(title, bodyHtml, { onSubmit, submitLabel = 'Save', size = '', extraButtons = '' } = {}) {
+  const dlg = document.createElement('dialog');
+  dlg.className = 'modal ' + size;
+  dlg.innerHTML = `<form novalidate><header><h2>${esc(title)}</h2><button type="button" class="icon-btn" data-close aria-label="Close">×</button></header><div class="body">${bodyHtml}</div><p class="err" role="alert"></p><footer>${extraButtons}<button type="button" class="btn ghost" data-close>${onSubmit ? 'Cancel' : 'Close'}</button>${onSubmit ? `<button type="submit" class="btn primary">${esc(submitLabel)}</button>` : ''}</footer></form>`;
+  document.body.append(dlg);
+  const form = dlg.querySelector('form');
+  const close = () => { dlg.close(); dlg.remove(); };
+  dlg.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+  dlg.addEventListener('cancel', e => { e.preventDefault(); close(); });
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    if (!onSubmit) return close();
+    const err = onSubmit(form);
+    if (err) { dlg.querySelector('.err').textContent = err; }
+    else { save(); close(); render(); }
+  });
+  dlg.showModal();
+  const firstInput = dlg.querySelector('.body input:not([type=hidden]),.body select,.body textarea');
+  if (firstInput) firstInput.focus();
+  return { dlg, form, close };
+}
+function formModal(title, fields, values, onSave, opts = {}) {
+  const v = values || {};
+  const body = (opts.intro || '') + `<div class="fgrid">${fields.map(f => fieldHtml(f, v[f.k] !== undefined ? v[f.k] : (typeof f.def === 'function' ? f.def() : f.def))).join('')}</div>${opts.note ? `<p class="note">${opts.note}</p>` : ''}`;
+  return modal(title, body, { ...opts, onSubmit: form => { const d = collect(form, fields); return validate(fields, d) || onSave(d, form); } });
+}
+function confirmModal(title, text, label, fn) { modal(title, `<p style="margin:0">${text}</p>`, { submitLabel: label, size: 'narrow', onSubmit: () => fn() }); }
+
+/* ---------- tables ---------- */
+function table(id, cols, rows, opts = {}) {
+  if (!rows.length) return empty(opts.empty || 'Nothing here yet.');
+  return `<div class="tblwrap"><table id="${id}"><thead><tr>${cols.map(c => `<th${c.num ? ' class="num"' : ''}>${c.l ? esc(c.l) : '<span class="sr">Actions</span>'}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr${opts.cls ? ` class="${opts.cls(r) || ''}"` : ''}>${cols.map(c => `<td${c.num ? ' class="num"' : ''}>${c.v(r) ?? ''}</td>`).join('')}</tr>`).join('')}</tbody>${opts.foot || ''}</table></div>`;
+}
+const searchBox = (tid, ph = 'Search') => `<input type="search" placeholder="${esc(ph)}" aria-label="${esc(ph)}" data-filter="${tid}" value="${esc(UI['q_' + tid] || '')}">`;
+function applyFilter(el) {
+  const q = el.value.toLowerCase().trim(); UI['q_' + el.dataset.filter] = el.value;
+  document.querySelectorAll('#' + el.dataset.filter + ' tbody tr').forEach(tr => { tr.hidden = !!q && !tr.textContent.toLowerCase().includes(q); });
+}
+const head = (title, sub = '', acts = '', crumb = '') => `<div class="ph"><div>${crumb ? `<div class="crumb">${crumb}</div>` : ''}<h1>${esc(title)}</h1>${sub ? `<p>${sub}</p>` : ''}</div>${acts ? `<div class="acts">${acts}</div>` : ''}</div>`;
+const btn = (label, act, data = {}, cls = '') => `<button type="button" class="btn ${cls}" data-act="${act}"${Object.entries(data).map(([k, v]) => ` data-${k}="${esc(v)}"`).join('')}>${esc(label)}</button>`;
+const editBtn = (act, id, label = 'Edit') => btn(label, act, { id }, 'sm');
+
+/* ---------- shared lookups ---------- */
+const campaignOpts = () => S.campaigns.map(k => [k.id, k.name]);
+const companyOpts = () => S.companies.map(c => [c.id, c.name]);
+const contactOpts = () => S.contacts.filter(c => c.status !== 'Archived').map(c => [c.id, c.name]);
+const counselOpts = () => S.counsel.map(l => [l.id, l.name + (l.firm ? ' (' + l.firm + ')' : '')]);
+const matterLabel = mt => `${mt.fileNumber} · ${byId('clients', mt.clientId)?.name || ''}`;
+const matterOpts = () => S.matters.map(mt => [mt.id, matterLabel(mt)]);
+const isOpenOpp = o => !['Won', 'Lost'].includes(o.stage);
+const PNC_DONE = ['Retained', 'Referred', 'Not retained', 'Closed'];
+function pipelineTotals(list) {
+  const expected = {}, weighted = {};
+  list.forEach(o => { if (o.value == null) return; expected[o.currency] = (expected[o.currency] || 0) + o.value; weighted[o.currency] = (weighted[o.currency] || 0) + Math.round(o.value * (Number(o.probability) || 0) / 100); });
+  return { expected, weighted };
+}
+const expTotal = e => (e.amount || 0) + (e.hst || 0);
+function sumByCur(list) { const o = {}; list.forEach(e => { o[e.currency] = (o[e.currency] || 0) + expTotal(e); }); return o; }
+function followQueue() {
+  const a = S.contacts.filter(c => c.status !== 'Archived' && c.followUp).map(c => ({ kind: 'Contact', id: c.id, name: c.name, link: '#/contact/' + c.id, followUp: c.followUp, nextAction: c.nextAction, ownerId: c.ownerId }));
+  const b = S.opps.filter(o => isOpenOpp(o) && o.followUp).map(o => ({ kind: 'Opportunity', id: o.id, name: o.title, link: '#/opps', followUp: o.followUp, nextAction: o.nextAction, ownerId: o.ownerId }));
+  return [...a, ...b].sort((x, y) => x.followUp.localeCompare(y.followUp));
+}
+function canSeeProgram(p, m = me()) { return p.visibility === 'General' || (p.visibility === 'Firm' && hasFirm(m)) || (p.visibility === 'Administrator' && isAdmin(m)); }
+const canSeeAudit = a => a.scope !== 'firm' || hasFirm();
+
+/* ---------- alerts ---------- */
+function alerts() {
+  const m = me(), t = today(), out = [];
+  const add = (key, title, detail, due, link, kind) => out.push({ key, title, detail, due, link, kind });
+  S.tasks.filter(x => x.assigneeId === m.id && !['Published', 'Completed'].includes(x.status) && x.due && x.due <= addDays(1))
+    .forEach(x => add(`task:${x.id}:${x.due}`, x.due < t ? 'Overdue work' : x.due === t ? 'Work due today' : 'Work due tomorrow', x.title, x.due, '#/work', 'Work'));
+  followQueue().filter(f => f.ownerId === m.id && f.followUp <= t)
+    .forEach(f => add(`fu:${f.id}:${f.followUp}`, f.followUp < t ? 'Overdue follow-up' : 'Follow-up due today', `${f.name}${f.nextAction ? ' — ' + f.nextAction : ''}`, f.followUp, '#/followups', 'Follow-up'));
+  if (hasFirm(m)) {
+    S.pncs.filter(p => !PNC_DONE.includes(p.status)).forEach(p => {
+      if (p.followUp && p.followUp <= t) add(`pnc:${p.id}:${p.followUp}`, 'PNC follow-up due', `${p.name}${p.nextAction ? ' — ' + p.nextAction : ''}`, p.followUp, '#/pnc/' + p.id, 'PNC');
+      [['limitationDate', 'Limitation date'], ['noticeDate', 'Notice date']].forEach(([k, l]) => {
+        if (p[k] && p[k] >= t && p[k] <= addDays(30)) add(`pnc${k}:${p.id}:${p[k]}`, `${l} approaching`, `${p.name} — ${fmtDate(p[k])} (verified by ${p.verifiedBy || '—'})`, p[k], '#/pnc/' + p.id, 'PNC');
+      });
+    });
+  }
+  S.programs.filter(p => p.status === 'Active' && p.renewal && p.renewal >= t && p.renewal <= addDays(14) && canSeeProgram(p) && (isAdmin(m) || p.accountOwner === m.id))
+    .forEach(p => add(`renew:${p.id}:${p.renewal}`, 'Program renewal coming up', `${p.provider} renews ${fmtDate(p.renewal)} · ${money(p.amount, p.currency)}`, p.renewal, p.kind === 'office' ? '#/oprograms' : '#/mprograms', 'Renewal'));
+  const wd = dow(t), h = nyHour();
+  if (wd >= 1 && wd <= 5 && h >= 17 && !S.reports.some(r => r.staffId === m.id && r.kind === 'Daily' && r.scope === 'General' && r.start === t && r.status !== 'Draft'))
+    add(`daily:${t}`, 'Daily update not submitted', 'The 5 p.m. New York cutoff has passed.', t, '#/reports', 'Report');
+  const wk = mondayOf(t);
+  if (((wd === 5 && h >= 17) || wd === 6 || wd === 0) && !S.reports.some(r => r.staffId === m.id && r.kind === 'Weekly' && r.scope === 'General' && r.start === wk && r.status !== 'Draft'))
+    add(`weekly:${wk}`, 'Weekly update not submitted', 'Weekly updates open Friday at 5 p.m. New York time.', t, '#/reports', 'Report');
+  (S.divContacts || []).filter(c => c.ownerId === m.id && c.status !== 'Archived' && c.followUp && c.followUp <= t && hasDiv(c.division, m))
+    .forEach(c => add(`dc:${c.id}:${c.followUp}`, `${DIV[c.division].name} follow-up`, `${c.name}${c.nextAction ? ' — ' + c.nextAction : ''}`, c.followUp, '#/dcontacts/' + c.division, 'Follow-up'));
+  S.reminders.filter(r => r.status === 'Open' && r.assigneeId === m.id && r.due <= t && (r.scope !== 'Firm' || hasFirm(m)))
+    .forEach(r => add(`rem:${r.id}:${r.due}`, 'Reminder', r.title, r.due, '#/attention', 'Reminder'));
+  return out.map(a => {
+    const st = S.alertStates[m.id + '|' + a.key];
+    let state = st?.state || 'new';
+    if (state === 'snoozed' && st.until <= t) state = 'new'; // snoozes expire by business date
+    return { ...a, state };
+  }).filter(a => a.state !== 'dismissed' && a.state !== 'snoozed').sort((x, y) => (x.due || '').localeCompare(y.due || ''));
+}
+function alertLi(a, full) {
+  return `<li class="${a.state === 'read' ? 'read' : ''}"><span class="dot" aria-hidden="true"></span><div class="grow"><div class="t">${esc(a.title)} ${full ? pill(a.kind) : ''}</div><div class="d">${esc(a.detail)}</div></div><div class="btns"><a class="btn sm" href="${a.link}">Open</a>${full ? `${a.state !== 'read' ? btn('Mark read', 'alert', { key: a.key, s: 'read' }, 'sm ghost') : ''}${btn('Snooze a day', 'alert', { key: a.key, s: 'snoozed', days: 1 }, 'sm ghost')}${btn('Dismiss', 'alert', { key: a.key, s: 'dismissed' }, 'sm ghost')}` : ''}</div></li>`;
+}
+
+/* =====================================================================
+   PAGES
+   ===================================================================== */
+const NAV = [
+  { g: 'Team', items: [['overview', 'Overview'], ['attention', 'Attention centre'], ['work', 'Team workspace'], ['calendar', 'Team calendar'], ['reports', 'Staff updates'],
+    ['__h', 'Office'], ['oprograms', 'Office directory'], ['folder/hr', 'Human Resources'], ['folder/sops', 'SOPs & Templates']] },
+  { g: 'JD&Co Law Firm', div: 'jdco', items: [['dcontacts/jdco', 'Contacts'], ['clients', 'Client directory'], ['pncs', 'PNC tracker'], ['counsel', 'Lawyer directory'], ['cexpenses', 'Client expenses']] },
+  { g: 'Marketing', div: 'marketing', items: [['contacts', 'Contacts'], ['companies', 'Company directory'], ['opps', 'Opportunities'], ['followups', 'Follow-ups'], ['campaigns', 'Campaigns and results'], ['mprograms', 'Marketing programs'], ['mexpenses', 'Marketing expenses']] },
+  ...DIVISIONS.filter(d => !['jdco', 'marketing'].includes(d.id)).map(d => ({ g: d.name, div: d.id, items: [['dcontacts/' + d.id, 'Contacts'], ...FOLDERS.filter(f => f.div === d.id).map(f => ['folder/' + f.id, f.name])] })),
+  { g: 'Administration', admin: true, items: [['imports', 'Import records'], ['people', 'People and access']] },
+];
+const PAGES = {
+  overview: { f: pgOverview }, attention: { f: pgAttention }, work: { f: pgWork }, calendar: { f: pgCalendar }, reports: { f: pgReports }, oprograms: { f: () => pgPrograms('office') },
+  campaigns: { f: pgCampaigns, div: 'marketing' }, contacts: { f: pgContacts, div: 'marketing' }, contact: { f: pgContact, nav: 'contacts', div: 'marketing' },
+  companies: { f: pgCompanies, div: 'marketing' }, opps: { f: pgOpps, div: 'marketing' }, followups: { f: pgFollowups, div: 'marketing' },
+  mprograms: { f: () => pgPrograms('marketing'), div: 'marketing' }, mexpenses: { f: () => pgExpenses('marketing'), div: 'marketing' },
+  cexpenses: { f: () => pgExpenses('client'), div: 'jdco' },
+  clients: { f: pgClients, div: 'jdco' }, client: { f: pgClient, div: 'jdco', nav: 'clients' }, checklist: { f: pgChecklist, div: 'jdco', nav: 'clients' },
+  pncs: { f: pgPncs, div: 'jdco' }, pnc: { f: pgPnc, div: 'jdco', nav: 'pncs' }, counsel: { f: pgCounsel, div: 'jdco' },
+  dcontacts: { f: pgDivContacts, divFromId: true }, folder: { f: pgFolder, folderFromId: true },
+  imports: { f: pgImports, admin: true }, people: { f: pgPeople, admin: true },
+};
+const ACT = {};
+ACT.setui = d => { UI[d.k] = d.v; render(); };
+ACT.copy = (d, el) => {
+  const fallback = () => { const ta = el.closest('dialog')?.querySelector('textarea'); if (ta) { ta.focus(); ta.select(); } toast('Press Ctrl+C to copy the selected text.'); };
+  try { navigator.clipboard.writeText(d.text).then(() => { const t = el.textContent; el.textContent = 'Copied'; setTimeout(() => { el.textContent = t; }, 1500); }, fallback); } catch (e) { fallback(); }
+};
+
+/* ---------- Overview ---------- */
+function pgOverview() {
+  const m = me(), t = today();
+  const al = alerts().filter(a => a.state !== 'read');
+  const openTasks = S.tasks.filter(x => !['Published', 'Completed'].includes(x.status)).length;
+  const fu = followQueue().filter(x => x.followUp <= t).length;
+  const pipe = pipelineTotals(S.opps.filter(isOpenOpp));
+  const spend = sumByCur(S.expenses.filter(e => e.scope === 'marketing' && e.state !== 'Voided' && e.date.slice(0, 7) === t.slice(0, 7)));
+  const h = new Date().getHours(), greet = h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+  const tile = (k, v, href, small) => `<a class="tile" href="${href}"><div class="k">${esc(k)}</div><div class="v${small ? ' small' : ''}">${v}</div></a>`;
+  const mk = hasDiv('marketing', m);
+  const divCards = myDivisions(m).map(d => {
+    const n = S.divContacts.filter(c => c.division === d.id && c.status !== 'Archived').length + (d.id === 'marketing' ? S.contacts.filter(c => c.status !== 'Archived').length : 0);
+    const extra = d.id === 'jdco' ? ` · ${S.clients.length} clients` : '';
+    return `<a class="tile" href="#/${d.id === 'marketing' ? 'contacts' : 'dcontacts/' + d.id}"><div class="k">${esc(d.name)}</div><div class="v small">${n} contact${n === 1 ? '' : 's'}${extra}</div></a>`;
+  }).join('');
+  return head('Overview', `Good ${greet}, ${esc(first(m.name))}. Here’s where things stand on ${fmtDate(t)}.`) +
+    `<div class="tiles">${tile('Open team work', openTasks, '#/work')}${mk ? tile('Marketing follow-ups due', fu, '#/followups') + tile('Weighted open pipeline', esc(curList(pipe.weighted)), '#/opps', true) + tile('Marketing spend this month (incl. HST)', esc(curList(spend)), '#/mexpenses', true) : ''}</div>
+    <section class="card"><h3>Your divisions</h3>${divCards ? `<div class="tiles" style="margin:0">${divCards}</div>` : empty('You don’t have access to any divisions yet. Ask Jasmine to add you.')}</section>
+    <div class="cols2"><section class="card"><h3>Needs your attention <a class="btn sm ghost" href="#/attention">All alerts</a></h3>${al.length ? `<ul class="alist">${al.slice(0, 6).map(a => alertLi(a)).join('')}</ul>` : empty('You’re all caught up.')}</section>
+    <section class="card quote-card"><h3>Today’s inspiration</h3><blockquote id="q-today">${esc(quoteToday())}</blockquote><div class="byline">Momentum</div></section></div>
+    <section class="card"><h3>Recent team activity</h3>${auditList(8)}</section>`;
+}
+function auditList(n) {
+  const rows = S.audit.filter(canSeeAudit).slice(0, n);
+  return rows.length ? `<ul class="tl">${rows.map(a => `<li><div>${esc(a.action)}: <strong>${esc(a.entity)}</strong></div><div class="m">${memberName(a.actor)} · ${fmtDT(a.at)}${a.scope === 'firm' ? ' · firm' : ''}</div></li>`).join('')}</ul>` : empty('No activity yet.');
+}
+
+/* ---------- Attention centre ---------- */
+function pgAttention() {
+  const m = me(), al = alerts();
+  const mine = S.reminders.filter(r => (r.assigneeId === m.id || r.createdBy === m.id) && (r.scope !== 'Firm' || hasFirm(m)));
+  return head('Attention centre', 'Alerts from your work, follow-ups, PNC dates, program renewals, missing staff updates and reminders. Refreshes every minute.', btn('Add reminder', 'addReminder', {}, 'primary')) +
+    `<section class="card"><h3>Alerts <span class="muted" style="font-weight:400;font-size:13px">${al.length} active</span></h3>${al.length ? `<ul class="alist">${al.map(a => alertLi(a, true)).join('')}</ul>` : empty('Nothing needs your attention right now.')}</section>
+    <section class="card"><h3>Reminders</h3>${table('tbl-rem', [
+      { l: 'Reminder', v: r => esc(r.title) + (r.notes ? `<div class="muted">${esc(r.notes)}</div>` : '') },
+      { l: 'Due', v: r => fmtDate(r.due) }, { l: 'For', v: r => memberName(r.assigneeId) }, { l: 'Scope', v: r => sp(r.scope) },
+      { l: 'Status', v: r => sp(r.status === 'Open' ? 'Open' : 'Completed') },
+      { l: '', v: r => r.status === 'Open' && r.assigneeId === m.id ? `<div class="acts-cell">${btn('Complete', 'completeReminder', { id: r.id }, 'sm')}</div>` : '' },
+    ], mine, { empty: 'No reminders yet.' })}<p class="note">Reminders show in the app only. Email, push and closed-browser delivery aren’t built yet.</p></section>`;
+}
+ACT.alert = d => { S.alertStates[me().id + '|' + d.key] = { state: d.s, until: d.days ? addDays(Number(d.days)) : undefined }; save(); render(); };
+ACT.addReminder = () => {
+  const admin = isAdmin();
+  formModal('Add reminder', [
+    { k: 'title', l: 'Reminder', req: true, full: true },
+    { k: 'due', l: 'Due date', t: 'date', req: true, def: today },
+    { k: 'assigneeId', l: 'For', t: 'select', req: true, blank: false, o: admin ? memberOpts() : () => [[me().id, me().name]], def: me().id },
+    { k: 'scope', l: 'Scope', t: 'select', blank: false, o: hasFirm() ? ['General', 'Firm'] : ['General'] },
+    { k: 'notes', l: 'Notes', t: 'textarea' },
+  ], null, d => {
+    if (!admin && d.assigneeId !== me().id) return 'You can only create reminders for yourself.';
+    if (d.scope === 'Firm' && !hasFirm(byId('members', d.assigneeId))) return 'Firm reminders need firm access for both the creator and the assignee.';
+    upsert('reminders', { ...d, status: 'Open' }); log('Created reminder', d.title, d.scope === 'Firm' ? 'firm' : 'general');
+  }, { size: 'narrow' });
+};
+ACT.completeReminder = d => { const r = byId('reminders', d.id); r.status = 'Completed'; r.completedAt = nowISO(); log('Completed reminder', r.title); save(); render(); };
+
+/* ---------- Team workspace ---------- */
+const TASK_FIELDS = () => [
+  { k: 'title', l: 'Title', req: true, full: true },
+  { k: 'brand', l: 'Brand', t: 'select', req: true, o: BRANDS },
+  { k: 'type', l: 'Work type', t: 'select', o: ['Social post', 'Blog', 'Email', 'Podcast', 'Video', 'Design', 'Event', 'Admin', 'Other'] },
+  { k: 'assigneeId', l: 'Assignee', t: 'select', req: true, o: memberOpts() },
+  { k: 'due', l: 'Due or publication date', t: 'date' },
+  { k: 'priority', l: 'Priority', t: 'select', blank: false, o: ['Low', 'Normal', 'High', 'Urgent'], def: 'Normal' },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: TASK_STATUS, def: 'Planned', help: 'Only administrators can approve or publish.' },
+  { k: 'campaignId', l: 'Campaign', t: 'select', o: campaignOpts },
+  { k: 'brief', l: 'Brief', t: 'textarea' },
+  { k: 'creativeLink', l: 'Creative link', t: 'url' },
+  { k: 'publishedLink', l: 'Published link', t: 'url' },
+];
+function pgWork() {
+  const m = me(), t = today();
+  const st = UI.workStatus || 'Open';
+  let rows = S.tasks.filter(x => st === 'All' || (st === 'Open' ? !['Published', 'Completed'].includes(x.status) : x.status === st));
+  if (UI.workMine) rows = rows.filter(x => x.assigneeId === m.id);
+  rows.sort((a, b) => (a.due || '9').localeCompare(b.due || '9'));
+  return head('Team workspace', 'Marketing and team work items. Client-specific notes belong in the JD&Co workspace.', btn('Add work item', 'editTask', {}, 'primary')) +
+    `<div class="tabs">${['Open', ...TASK_STATUS, 'All'].map(s => `<button type="button" class="${s === st ? 'on' : ''}" aria-pressed="${s === st}" data-act="setui" data-k="workStatus" data-v="${s}">${s}</button>`).join('')}</div>
+    <div class="toolbar">${searchBox('tbl-work', 'Search work')}<label class="chk"><input type="checkbox" data-ui="workMine"${UI.workMine ? ' checked' : ''}> Only mine</label></div>` +
+    table('tbl-work', [
+      { l: 'Work item', v: x => `<strong>${esc(x.title)}</strong>${x.brief ? `<div class="muted">${esc(x.brief)}</div>` : ''}` },
+      { l: 'Brand', v: x => esc(x.brand) }, { l: 'Type', v: x => esc(x.type || '—') }, { l: 'Assignee', v: x => memberName(x.assigneeId) },
+      { l: 'Due', v: x => x.due ? (x.due < t && !['Published', 'Completed'].includes(x.status) ? `<span style="color:var(--bad);font-weight:600">${fmtDate(x.due)}</span>` : fmtDate(x.due)) : '—' },
+      { l: 'Priority', v: x => sp(x.priority) }, { l: 'Status', v: x => sp(x.status) },
+      { l: 'Links', v: x => [x.creativeLink && ext(x.creativeLink, 'Creative'), x.publishedLink && ext(x.publishedLink, 'Live')].filter(Boolean).join('<br>') || '<span class="muted">—</span>' },
+      { l: '', v: x => `<div class="acts-cell">${editBtn('editTask', x.id)}</div>` },
+    ], rows, { empty: 'No work items match.' });
+}
+ACT.editTask = d => {
+  const prev = d.id ? byId('tasks', d.id) : null;
+  formModal(prev ? 'Edit work item' : 'Add work item', TASK_FIELDS(), prev, v => {
+    if (['Approved', 'Published'].includes(v.status) && v.status !== prev?.status && !isAdmin()) return 'Only an administrator can approve or publish work.';
+    if (v.status === 'Published' && !v.publishedLink) return 'Add the published link before marking this Published.';
+    upsert('tasks', { ...v, id: prev?.id }); log(prev ? 'Updated work item' : 'Created work item', v.title);
+  });
+};
+
+/* ---------- Campaigns ---------- */
+const CAMPAIGN_FIELDS = () => [
+  { k: 'name', l: 'Campaign name', req: true, full: true },
+  { k: 'brand', l: 'Brand', t: 'select', req: true, o: BRANDS },
+  { k: 'ownerId', l: 'Owner', t: 'select', req: true, o: memberOpts() },
+  { k: 'objective', l: 'Objective', t: 'textarea' },
+  { k: 'start', l: 'Start date', t: 'date', req: true }, { k: 'end', l: 'End date', t: 'date' },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Planning', 'Active', 'Paused', 'Completed'] },
+  { k: 'budget', l: 'Budget including tax', t: 'money' }, { k: 'currency', l: 'Currency', t: 'select', blank: false, o: CURS },
+  { k: 'landingUrl', l: 'Landing page', t: 'url', full: true },
+  { k: 'utmSource', l: 'UTM source', help: 'For example linkedin or newsletter' }, { k: 'utmMedium', l: 'UTM medium', help: 'For example paid-social or email' },
+];
+function utmUrl(k) {
+  if (!k.landingUrl) return '';
+  try { const u = new URL(k.landingUrl); if (k.utmSource) u.searchParams.set('utm_source', k.utmSource); if (k.utmMedium) u.searchParams.set('utm_medium', k.utmMedium); u.searchParams.set('utm_campaign', slug(k.name)); return u.toString(); } catch (e) { return ''; }
+}
+function campaignResults(k) {
+  const contacts = S.contacts.filter(c => c.campaignId === k.id).length;
+  const opps = S.opps.filter(o => o.campaignId === k.id);
+  const won = opps.filter(o => o.stage === 'Won').length, lost = opps.filter(o => o.stage === 'Lost').length;
+  const spend = sumByCur(S.expenses.filter(e => e.scope === 'marketing' && e.campaignId === k.id && e.state !== 'Voided'));
+  const same = spend[k.currency] || 0;
+  return { contacts, opps: opps.length, won, lost, winRate: won + lost ? Math.round(won / (won + lost) * 100) + '%' : 'Undefined (nothing closed yet)', spend, remaining: k.budget != null ? k.budget - same : null, cpc: contacts ? Math.round(same / contacts) : null, work: S.tasks.filter(x => x.campaignId === k.id).length };
+}
+function pgCampaigns() {
+  const cards = S.campaigns.slice().sort((a, b) => b.start.localeCompare(a.start)).map(k => {
+    const r = campaignResults(k), u = utmUrl(k);
+    return `<section class="card"><h3><span>${esc(k.name)}</span>${sp(k.status)}</h3>
+      <p class="muted" style="margin:-6px 0 12px">${esc(k.brand)} · ${memberName(k.ownerId)} · ${fmtDate(k.start)} – ${fmtDate(k.end)}</p>
+      ${k.objective ? `<p style="margin:0 0 12px">${esc(k.objective)}</p>` : ''}
+      ${dl([['Budget (incl. tax)', k.budget != null ? money(k.budget, k.currency) : ''], ['Spend incl. HST', esc(curList(r.spend))], ['Remaining', r.remaining != null ? `<span style="${r.remaining < 0 ? 'color:var(--bad);font-weight:600' : ''}">${money(r.remaining, k.currency)}</span>` : ''],
+        ['Linked contacts', r.contacts], ['Opportunities', `${r.opps} (${r.won} won, ${r.lost} lost)`], ['Win rate', esc(r.winRate)], ['Cost per linked contact', r.cpc != null ? money(r.cpc, k.currency) : 'n/a'], ['Linked work items', r.work]])}
+      ${u ? `<p class="note">Tracking link: <a href="${esc(u)}" target="_blank" rel="noopener" style="word-break:break-all">${esc(u)}</a> ${btn('Copy', 'copy', { text: u }, 'sm ghost')}</p>` : ''}
+      <div style="margin-top:12px">${editBtn('editCampaign', k.id)}</div></section>`;
+  }).join('');
+  return head('Campaigns and results', 'Results count only the contacts, opportunities, work and expenses linked to each campaign by hand. UTM links don’t install tracking.', btn('Add campaign', 'editCampaign', {}, 'primary')) +
+    (cards ? `<div class="grid-cards">${cards}</div>` : empty('No campaigns yet.'));
+}
+ACT.editCampaign = d => {
+  const prev = d.id ? byId('campaigns', d.id) : null;
+  formModal(prev ? 'Edit campaign' : 'Add campaign', CAMPAIGN_FIELDS(), prev || { currency: 'CAD', status: 'Planning' }, v => {
+    if (v.end && v.end < v.start) return 'End date must be on or after the start date.';
+    if (!byId('members', v.ownerId)?.active) return 'Choose an active staff owner.';
+    upsert('campaigns', { ...v, id: prev?.id }); log(prev ? 'Updated campaign' : 'Created campaign', v.name);
+  });
+};
+
+/* ---------- Calendar ---------- */
+function pgCalendar() {
+  const t = today(), ym = UI.calMonth || t.slice(0, 7);
+  const firm = UI.calFirm && hasFirm();
+  const items = {};
+  const add = (date, label, cls, href) => { if (date && date.slice(0, 7) === ym) (items[date] = items[date] || []).push({ label, cls, href }); };
+  if (hasDiv('marketing')) {
+    S.campaigns.forEach(k => { add(k.start, 'Starts: ' + k.name, 'campaign', '#/campaigns'); add(k.end, 'Ends: ' + k.name, 'campaign', '#/campaigns'); });
+    followQueue().forEach(f => add(f.followUp, 'Follow up: ' + f.name, 'follow', f.link));
+  }
+  S.tasks.filter(x => x.status !== 'Completed').forEach(x => add(x.due, x.title, 'work', '#/work'));
+  S.divContacts.filter(c => c.status !== 'Archived' && c.followUp && hasDiv(c.division) && (c.division !== 'jdco' || firm)).forEach(c => add(c.followUp, 'Follow up: ' + c.name, c.division === 'jdco' ? 'firm' : 'follow', '#/dcontacts/' + c.division));
+  if (firm) S.pncs.forEach(p => { add(p.followUp, 'PNC: ' + p.name, 'firm', '#/pnc/' + p.id); add(p.limitationDate, 'Limitation: ' + p.name, 'firm', '#/pnc/' + p.id); add(p.noticeDate, 'Notice: ' + p.name, 'firm', '#/pnc/' + p.id); });
+  const firstDay = ym + '-01', startCell = mondayOf(firstDay);
+  const cells = [];
+  for (let i = 0; i < 42; i++) { const ds = shift(startCell, i); if (i % 7 === 0 && i >= 28 && ds.slice(0, 7) !== ym) break; cells.push(ds); }
+  const prevM = shift(firstDay, -1).slice(0, 7), nextM = shift(firstDay, 32).slice(0, 7);
+  return head('Team calendar', 'Campaign dates, work deadlines and marketing follow-ups. There’s no sync with an outside calendar.') +
+    `<div class="toolbar"><button type="button" class="btn sm" data-act="setui" data-k="calMonth" data-v="${prevM}" aria-label="Previous month">‹</button><strong style="min-width:150px;text-align:center">${fmtMonth(ym)}</strong><button type="button" class="btn sm" data-act="setui" data-k="calMonth" data-v="${nextM}" aria-label="Next month">›</button><button type="button" class="btn sm ghost" data-act="setui" data-k="calMonth" data-v="${t.slice(0, 7)}">Today</button>
+    ${hasFirm() ? `<label class="chk" style="margin-left:auto"><input type="checkbox" data-ui="calFirm"${UI.calFirm ? ' checked' : ''}> Include firm PNC and legal dates</label>` : ''}</div>
+    <div class="cal"><div class="cal-grid">${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(x => `<div class="dow">${x}</div>`).join('')}
+    ${cells.map(ds => `<div class="day${ds.slice(0, 7) !== ym ? ' out' : ''}${ds === t ? ' today' : ''}"><span class="n">${Number(ds.slice(8))}</span>${(items[ds] || []).map(it => `<a class="chip ${it.cls}" href="${it.href}" title="${esc(it.label)}">${esc(it.label)}</a>`).join('')}</div>`).join('')}</div></div>
+    <div class="legend"><span style="--c:var(--violet)">Campaign</span><span style="--c:#111">Work</span><span style="--c:var(--pink)">Follow-up</span>${firm ? '<span style="--c:var(--warn)">Firm (restricted)</span>' : ''}</div>`;
+}
+
+/* ---------- Staff updates ---------- */
+const REPORT_PARTS = [['completed', 'Completed work'], ['inProgress', 'Work in progress'], ['blockers', 'Blockers'], ['decisions', 'Decisions needed from Jasmine'], ['next', 'Next priorities']];
+function periodRange(kind, ds) { const s = kind === 'Weekly' ? mondayOf(ds) : ds; return [s, kind === 'Weekly' ? shift(s, 6) : s]; }
+const reportFor = (staffId, kind, scope, start) => S.reports.find(r => r.staffId === staffId && r.kind === kind && r.scope === scope && r.start === start);
+function pgReports() {
+  const m = me();
+  const kind = UI.repKind || 'Daily', scope = hasFirm() ? (UI.repScope || 'General') : 'General', date = UI.repDate || today();
+  const [start, end] = periodRange(kind, date);
+  const mine = reportFor(m.id, kind, scope, start);
+  const label = kind === 'Weekly' ? `Week of ${fmtDate(start)} – ${fmtDate(end)}` : fmtDate(start);
+  const team = isAdmin() ? activeMembers().filter(x => x.id !== m.id && (scope === 'General' || hasFirm(x))) : [];
+  return head('Staff updates', 'Daily and weekly updates. Periods follow New York time, and weeks run Monday to Sunday. Drafts stay private to you.') +
+    `<div class="toolbar"><div class="tabs" style="margin:0">${['Daily', 'Weekly'].map(k => `<button type="button" class="${k === kind ? 'on' : ''}" aria-pressed="${k === kind}" data-act="setui" data-k="repKind" data-v="${k}">${k}</button>`).join('')}</div>
+    ${hasFirm() ? `<select data-ui="repScope" aria-label="Report scope">${['General', 'Firm'].map(s => `<option${s === scope ? ' selected' : ''}>${s}</option>`).join('')}</select>` : ''}
+    <input type="date" data-ui="repDate" value="${date}" aria-label="Report date"><span class="muted">${esc(label)}</span></div>
+    <div class="cols2"><section class="card report-form"><h3><span>Your ${kind.toLowerCase()} ${scope.toLowerCase()} update</span>${mine ? sp(mine.reviewedBy ? 'Reviewed' : mine.status) : pill('Not started')}</h3>
+      <form id="repForm" data-rev="${mine?.rev || 0}">${REPORT_PARTS.map(([k, l]) => `<div class="field"><label for="rp_${k}">${l}</label><textarea id="rp_${k}" name="${k}" rows="3">${esc(mine?.[k])}</textarea></div>`).join('')}</form>
+      ${mine?.counters ? `<p class="note">Activity snapshot at last save: ${mine.counters.tasksDone} work items finished · ${mine.counters.activities} relationship activities${scope === 'Firm' ? ` · ${mine.counters.attempts} PNC contact attempts` : ''}.</p>` : ''}
+      ${mine?.reviewedBy ? `<p class="note">Reviewed by ${memberName(mine.reviewedBy)} on ${fmtDT(mine.reviewedAt)}. Editing clears this review.</p>` : ''}
+      <div class="toolbar" style="margin:14px 0 0">${btn('Save draft', 'saveReport', { submit: '' })}${btn(mine?.status === 'Submitted' ? 'Update submitted report' : 'Submit', 'saveReport', { submit: '1' }, 'primary')}${mine ? btn('Download recap', 'recap', { id: mine.id }, 'ghost') : ''}</div>
+      <p class="note">Recaps download as text. Nothing is emailed.</p></section>
+    <section class="card"><h3>Team status</h3>${isAdmin() ? table('tbl-team', [
+      { l: 'Staff', v: x => esc(x.name) },
+      { l: 'Status', v: x => { const r = reportFor(x.id, kind, scope, start); return r ? sp(r.reviewedBy ? 'Reviewed' : r.status) : pill('No report'); } },
+      { l: '', v: x => { const r = reportFor(x.id, kind, scope, start); return r && r.status === 'Submitted' ? `<div class="acts-cell">${btn('View', 'viewReport', { id: r.id }, 'sm')}</div>` : r ? '<span class="muted">Draft (private)</span>' : ''; } },
+    ], team, { empty: 'No other staff in this scope.' }) : `<p class="muted" style="margin:0">Administrators can see who has submitted. You can only see and edit your own updates.</p>`}</section></div>`;
+}
+ACT.saveReport = d => {
+  const m = me(), kind = UI.repKind || 'Daily', scope = hasFirm() ? (UI.repScope || 'General') : 'General';
+  const [start, end] = periodRange(kind, UI.repDate || today());
+  const form = $('#repForm'), data = {};
+  REPORT_PARTS.forEach(([k]) => { data[k] = form.elements[k].value.trim(); });
+  const r = reportFor(m.id, kind, scope, start);
+  if (r && String(r.rev) !== form.dataset.rev) return alertBox('This update was changed somewhere else. Refresh and try again.');
+  if (d.submit && !REPORT_PARTS.some(([k]) => data[k])) return alertBox('Write at least one section before submitting.');
+  const inP = iso => { const ds = nyFmt.format(new Date(iso)); return ds >= start && ds <= end; };
+  const counters = {
+    tasksDone: S.tasks.filter(x => x.assigneeId === m.id && ['Completed', 'Published'].includes(x.status) && x.updatedAt && inP(x.updatedAt)).length,
+    activities: S.activities.filter(a => a.actor === m.id && inP(a.at)).length,
+    attempts: S.attempts.filter(a => a.actor === m.id && !a.importedStaff && inP(a.at)).length,
+  };
+  const status = d.submit ? 'Submitted' : (r?.status === 'Submitted' ? 'Submitted' : 'Draft');
+  const rec = { ...data, staffId: m.id, kind, scope, start, status, counters, savedAt: nowISO(), reviewedBy: null, reviewedAt: null };
+  if (r) Object.assign(r, rec, { rev: r.rev + 1 }); else S.reports.push({ ...rec, id: uid(), rev: 1 });
+  if (status === 'Submitted') log(`Submitted ${kind.toLowerCase()} update`, fmtDate(start), scope === 'Firm' ? 'firm' : 'general');
+  save(); render(); toast(d.submit ? 'Update submitted.' : 'Draft saved.');
+};
+ACT.recap = d => {
+  const r = byId('reports', d.id);
+  const txt = `Momentum ${r.kind.toLowerCase()} update (${r.scope})\n${byId('members', r.staffId).name} · ${r.kind === 'Weekly' ? 'week of ' : ''}${r.start}\nStatus: ${r.status}\n\n` + REPORT_PARTS.map(([k, l]) => `${l}\n${r[k] || '—'}\n`).join('\n');
+  download(`momentum-${r.kind.toLowerCase()}-update-${r.start}.txt`, txt);
+};
+ACT.viewReport = d => {
+  const r = byId('reports', d.id), m = me();
+  if (r.status !== 'Submitted' || (r.scope === 'Firm' && !hasFirm())) return;
+  const body = `<p class="muted" style="margin-top:0">${memberName(r.staffId)} · ${r.kind} ${r.scope.toLowerCase()} · ${fmtDate(r.start)} · saved ${fmtDT(r.savedAt)}</p>` + REPORT_PARTS.map(([k, l]) => `<div class="dl-h">${l}</div><div style="white-space:pre-wrap">${esc(r[k] || '—')}</div>`).join('') + (r.reviewedBy ? `<p class="note">Reviewed by ${memberName(r.reviewedBy)} on ${fmtDT(r.reviewedAt)}.</p>` : '');
+  modal('Staff update', body, r.reviewedBy || r.staffId === m.id ? {} : { submitLabel: 'Mark reviewed', onSubmit: () => { r.reviewedBy = m.id; r.reviewedAt = nowISO(); r.rev++; log('Reviewed update', byId('members', r.staffId).name + ', ' + r.start); } });
+};
+
+/* ---------- Contacts & companies ---------- */
+const CONTACT_FIELDS = () => [
+  { k: 'name', l: 'Name', req: true }, { k: 'email', l: 'Email', t: 'email' }, { k: 'phone', l: 'Phone', t: 'tel' },
+  { k: 'companyId', l: 'Company', t: 'select', o: companyOpts }, { k: 'role', l: 'Role or title' },
+  { k: 'source', l: 'Source', t: 'select', o: ['Website', 'Referral', 'Event', 'Social', 'Podcast', 'Import', 'Other'] },
+  { k: 'brands', l: 'Brands', t: 'multi', req: true, o: BRANDS },
+  { k: 'ownerId', l: 'Staff owner', t: 'select', req: true, o: memberOpts() },
+  { k: 'campaignId', l: 'Primary campaign', t: 'select', o: campaignOpts },
+  { k: 'h1', l: 'Email permission', t: 'h' },
+  { k: 'emailPref', l: 'Email preference', t: 'select', blank: false, o: ['Unknown', 'Granted', 'Declined', 'Unsubscribed'] },
+  { k: 'prefDate', l: 'Permission date', t: 'date' }, { k: 'prefEvidence', l: 'Evidence', full: true, help: 'Where or how permission was given.' },
+  { k: 'h2', l: 'Next step', t: 'h' },
+  { k: 'nextAction', l: 'Next action' }, { k: 'followUp', l: 'Follow-up date', t: 'date' },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Active', 'Archived'] },
+  { k: 'notes', l: 'Notes', t: 'textarea' },
+];
+function pgContacts() {
+  const b = UI.ctBrand || '';
+  const rows = S.contacts.filter(c => (!b || (c.brands || []).includes(b)) && (UI.ctArchived || c.status !== 'Archived')).sort((a, z) => a.name.localeCompare(z.name));
+  return head('Marketing contacts', 'Kept separate from legal client records. Momentum records preferences and activity; it doesn’t send campaigns.', btn('Add contact', 'editContact', {}, 'primary')) +
+    `<div class="toolbar">${searchBox('tbl-ct', 'Search name, email, company')}<select data-ui="ctBrand" aria-label="Brand"><option value="">All brands</option>${BRANDS.map(x => `<option${x === b ? ' selected' : ''}>${esc(x)}</option>`).join('')}</select><label class="chk"><input type="checkbox" data-ui="ctArchived"${UI.ctArchived ? ' checked' : ''}> Show archived</label></div>` +
+    table('tbl-ct', [
+      { l: 'Name', v: c => `<a class="name" href="#/contact/${c.id}">${esc(c.name)}</a><div class="muted">${esc(c.email || '')}</div>` },
+      { l: 'Company', v: c => c.companyId ? nameOf('companies', c.companyId) : '—' },
+      { l: 'Brands', v: c => `<div class="tags">${(c.brands || []).map(x => pill(x)).join('')}</div>` },
+      { l: 'Owner', v: c => memberName(c.ownerId) }, { l: 'Email permission', v: c => sp(c.emailPref || 'Unknown') },
+      { l: 'Next action', v: c => c.nextAction ? `${esc(c.nextAction)}<div class="muted">${fmtDate(c.followUp)}</div>` : '—' },
+      { l: 'Status', v: c => sp(c.status) },
+    ], rows, { empty: 'No contacts match.' });
+}
+ACT.editContact = d => {
+  const prev = d.id ? byId('contacts', d.id) : null;
+  formModal(prev ? 'Edit contact' : 'Add contact', CONTACT_FIELDS(), prev || { emailPref: 'Unknown', status: 'Active', ownerId: me().id }, (v, form) => {
+    if (v.emailPref === 'Granted' && !v.prefDate) return 'Record the date permission was granted.';
+    const emailChanged = v.email && v.email.toLowerCase() !== (prev?.email || '').toLowerCase();
+    const dup = emailChanged && S.contacts.find(c => c.id !== prev?.id && (c.email || '').toLowerCase() === v.email.toLowerCase());
+    if (dup && form.dataset.dupOk !== v.email.toLowerCase()) { form.dataset.dupOk = v.email.toLowerCase(); return `${dup.name} already uses ${v.email}. If this shared address is intentional, select Save again to confirm.`; }
+    const rec = upsert('contacts', { ...v, id: prev?.id }); log(prev ? 'Updated contact' : 'Created contact', rec.name);
+  });
+};
+function pgContact(id) {
+  const c = byId('contacts', id);
+  if (!c) return head('Contact not found', '', '', '<a href="#/contacts">← Marketing contacts</a>');
+  const acts = S.activities.filter(a => a.contactId === id).sort((a, b) => b.at.localeCompare(a.at));
+  const opps = S.opps.filter(o => o.contactId === id);
+  return head(c.name, [c.role, c.companyId && byId('companies', c.companyId)?.name].filter(Boolean).map(esc).join(' · '), btn('Log activity', 'logActivity', { contact: id }, 'primary') + editBtn('editContact', id), '<a href="#/contacts">← Marketing contacts</a>') +
+    `<section class="card">${dl([['Email', esc(c.email)], ['Phone', esc(c.phone)], ['Brands', (c.brands || []).map(x => pill(x)).join(' ')], ['Source', esc(c.source)], ['Owner', memberName(c.ownerId)], ['Primary campaign', c.campaignId ? nameOf('campaigns', c.campaignId) : ''],
+      ['Email permission', sp(c.emailPref) + (c.prefDate ? ` <span class="muted">${fmtDate(c.prefDate)}</span>` : '')], ['Evidence', esc(c.prefEvidence)], ['Next action', esc(c.nextAction)], ['Follow-up', c.followUp ? fmtDate(c.followUp) : ''], ['Status', sp(c.status)], ['Notes', esc(c.notes)]])}</section>
+    <div class="cols2"><section class="card"><h3>Activity</h3>${acts.length ? `<ul class="tl">${acts.map(activityLi).join('')}</ul>` : empty('No activity logged yet.')}<p class="note">Activity is append-only.</p></section>
+    <section class="card"><h3>Opportunities ${btn('Add', 'editOpp', { contact: id }, 'sm')}</h3>${opps.length ? opps.map(o => `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><strong>${esc(o.title)}</strong> ${sp(o.stage)}<div class="muted">${esc(o.pipeline)} · ${o.value != null ? money(o.value, o.currency) : '—'}</div></div>`).join('') : empty('No opportunities.')}</section></div>`;
+}
+function activityLi(a) {
+  return `<li><div>${a.kind === 'stage' ? '' : `<strong>${esc(a.method)}</strong> · ${esc(a.direction || '')} — `}${esc(a.outcome)}</div>${a.notes ? `<div>${esc(a.notes)}</div>` : ''}<div class="m">${memberName(a.actor)} · ${fmtDT(a.at)}${a.oppId ? ' · ' + nameOf('opps', a.oppId, 'title') : ''}</div></li>`;
+}
+ACT.logActivity = d => {
+  const src = d.opp ? byId('opps', d.opp) : byId('contacts', d.contact);
+  formModal('Log activity', [
+    { k: 'at', l: 'Date and time', t: 'datetime', req: true, def: localNow },
+    { k: 'method', l: 'Method', t: 'select', req: true, o: ['Call', 'Email', 'Meeting', 'Text', 'Social', 'Event', 'Other'] },
+    { k: 'direction', l: 'Direction', t: 'select', blank: false, o: ['Outbound', 'Inbound'] },
+    { k: 'outcome', l: 'Outcome', req: true }, { k: 'notes', l: 'Notes', t: 'textarea' },
+    { k: 'h', l: 'Update the next step', t: 'h' },
+    { k: 'nextAction', l: 'Next action' }, { k: 'followUp', l: 'Follow-up date', t: 'date' },
+  ], { nextAction: src.nextAction, followUp: src.followUp }, v => {
+    if (d.opp && isOpenOpp(src) && (!v.nextAction || !v.followUp)) return 'Open opportunities need a next action and follow-up date.';
+    S.activities.push({ id: uid(), at: new Date(v.at).toISOString(), method: v.method, direction: v.direction, outcome: v.outcome, notes: v.notes, contactId: d.opp ? src.contactId : src.id, oppId: d.opp || null, actor: me().id });
+    src.nextAction = v.nextAction; src.followUp = v.followUp;
+    log('Logged activity', src.name || src.title);
+  }, { size: 'narrow' });
+};
+const COMPANY_FIELDS = () => [
+  { k: 'name', l: 'Company name', req: true, full: true }, { k: 'industry', l: 'Industry' }, { k: 'website', l: 'Website', t: 'url' },
+  { k: 'phone', l: 'Phone', t: 'tel' }, { k: 'ownerId', l: 'Relationship owner', t: 'select', o: memberOpts() },
+  { k: 'brands', l: 'Brands', t: 'multi', o: BRANDS }, { k: 'notes', l: 'Notes', t: 'textarea' },
+];
+function pgCompanies() {
+  return head('Company directory', 'The businesses behind your contacts and opportunities.', btn('Add company', 'editCompany', {}, 'primary')) +
+    `<div class="toolbar">${searchBox('tbl-co', 'Search companies')}</div>` +
+    table('tbl-co', [
+      { l: 'Company', v: c => `<strong>${esc(c.name)}</strong><div class="muted">${esc(c.industry || '')}</div>` },
+      { l: 'Brands', v: c => `<div class="tags">${(c.brands || []).map(x => pill(x)).join('')}</div>` },
+      { l: 'Contacts', v: c => S.contacts.filter(x => x.companyId === c.id).map(x => `<a href="#/contact/${x.id}">${esc(x.name)}</a>`).join(', ') || '—' },
+      { l: 'Open opportunities', num: true, v: c => S.opps.filter(o => o.companyId === c.id && isOpenOpp(o)).length },
+      { l: 'Owner', v: c => memberName(c.ownerId) }, { l: 'Website', v: c => ext(c.website, 'Site') },
+      { l: '', v: c => `<div class="acts-cell">${editBtn('editCompany', c.id)}</div>` },
+    ], S.companies.slice().sort((a, b) => a.name.localeCompare(b.name)));
+}
+ACT.editCompany = d => {
+  const prev = d.id ? byId('companies', d.id) : null;
+  formModal(prev ? 'Edit company' : 'Add company', COMPANY_FIELDS(), prev, v => { upsert('companies', { ...v, id: prev?.id }); log(prev ? 'Updated company' : 'Created company', v.name); });
+};
+
+/* ---------- Opportunities ---------- */
+function pgOpps() {
+  const p = UI.oppPipe || 'All';
+  const rows = S.opps.filter(o => (p === 'All' || o.pipeline === p) && (UI.oppClosed || isOpenOpp(o)));
+  const tot = pipelineTotals(rows.filter(isOpenOpp));
+  return head('Opportunities', 'Expected and weighted values stay separate by currency. They describe the pipeline, not money received.', btn('Add opportunity', 'editOpp', {}, 'primary')) +
+    `<div class="tabs">${['All', ...Object.keys(PIPES)].map(x => `<button type="button" class="${x === p ? 'on' : ''}" aria-pressed="${x === p}" data-act="setui" data-k="oppPipe" data-v="${esc(x)}">${esc(x)}</button>`).join('')}</div>
+    <div class="tiles"><div class="tile"><div class="k">Open expected value</div><div class="v small">${esc(curList(tot.expected))}</div></div><div class="tile"><div class="k">Open weighted value</div><div class="v small">${esc(curList(tot.weighted))}</div></div><div class="tile"><div class="k">Open opportunities</div><div class="v">${rows.filter(isOpenOpp).length}</div></div></div>
+    <div class="toolbar">${searchBox('tbl-opp', 'Search opportunities')}<label class="chk"><input type="checkbox" data-ui="oppClosed"${UI.oppClosed ? ' checked' : ''}> Show won and lost</label></div>` +
+    table('tbl-opp', [
+      { l: 'Opportunity', v: o => `<strong>${esc(o.title)}</strong><div class="muted">${esc(o.pipeline)}</div>` },
+      { l: 'Stage', v: o => sp(o.stage) + (o.lostReason && o.stage === 'Lost' ? `<div class="muted">${esc(o.lostReason)}</div>` : '') },
+      { l: 'Linked to', v: o => [o.contactId && `<a href="#/contact/${o.contactId}">${nameOf('contacts', o.contactId)}</a>`, o.companyId && nameOf('companies', o.companyId)].filter(Boolean).join('<br>') || '—' },
+      { l: 'Owner', v: o => memberName(o.ownerId) },
+      { l: 'Value', num: true, v: o => o.value != null ? money(o.value, o.currency) : '—' }, { l: 'Prob.', num: true, v: o => (o.probability ?? 0) + '%' },
+      { l: 'Weighted', num: true, v: o => o.value != null ? money(Math.round(o.value * (o.probability || 0) / 100), o.currency) : '—' },
+      { l: 'Next step', v: o => isOpenOpp(o) ? `${esc(o.nextAction || '')}<div class="muted">${fmtDate(o.followUp)}</div>` : '—' },
+      { l: '', v: o => `<div class="acts-cell">${btn('History', 'oppHistory', { id: o.id }, 'sm ghost')}${isOpenOpp(o) ? btn('Log', 'logActivity', { opp: o.id }, 'sm ghost') : ''}${editBtn('editOpp', o.id)}</div>` },
+    ], rows, { empty: 'No opportunities match.' });
+}
+ACT.editOpp = d => {
+  const prev = d.id ? byId('opps', d.id) : null;
+  const pipe = prev?.pipeline || 'Software sales';
+  const fields = [
+    { k: 'title', l: 'Opportunity', req: true, full: true },
+    { k: 'pipeline', l: 'Pipeline', t: 'select', req: true, blank: false, o: Object.keys(PIPES) },
+    { k: 'stage', l: 'Stage', t: 'select', req: true, blank: false, o: PIPES[pipe] },
+    { k: 'contactId', l: 'Contact', t: 'select', o: contactOpts }, { k: 'companyId', l: 'Company', t: 'select', o: companyOpts },
+    { k: 'ownerId', l: 'Staff owner', t: 'select', req: true, o: memberOpts() },
+    { k: 'campaignId', l: 'Primary campaign', t: 'select', o: campaignOpts },
+    { k: 'value', l: 'Expected value', t: 'money' }, { k: 'currency', l: 'Currency', t: 'select', blank: false, o: CURS },
+    { k: 'probability', l: 'Probability %', t: 'number', help: 'Won sets 100 and Lost sets 0.' },
+    { k: 'nextAction', l: 'Next action' }, { k: 'followUp', l: 'Follow-up date', t: 'date' },
+    { k: 'lostReason', l: 'Lost reason', full: true, help: 'Required when the outcome is Lost.' },
+    { k: 'notes', l: 'Notes', t: 'textarea' },
+  ];
+  const { form } = formModal(prev ? 'Edit opportunity' : 'Add opportunity', fields, prev || { pipeline: pipe, currency: 'CAD', probability: 10, ownerId: me().id, contactId: d.contact || '' }, v => {
+    const open = !['Won', 'Lost'].includes(v.stage);
+    if (open) {
+      if (!v.contactId && !v.companyId) return 'Link an open opportunity to a contact or company.';
+      if (!v.nextAction || !v.followUp) return 'Open opportunities need a next action and follow-up date.';
+      if (!byId('members', v.ownerId)?.active) return 'Choose an active staff owner.';
+    }
+    if (v.stage === 'Lost' && !v.lostReason) return 'Add a reason for the lost outcome.';
+    if (v.stage === 'Won') v.probability = 100; else if (v.stage === 'Lost') v.probability = 0;
+    if (v.probability != null && (v.probability < 0 || v.probability > 100)) return 'Probability must be between 0 and 100.';
+    const rec = upsert('opps', { ...v, id: prev?.id });
+    if (!prev || prev.stage !== v.stage) S.activities.push({ id: uid(), at: nowISO(), kind: 'stage', outcome: prev ? `Stage changed: ${prev.stage} → ${v.stage}` : `Created at stage ${v.stage}`, oppId: rec.id, contactId: v.contactId, actor: me().id });
+    log(prev ? 'Updated opportunity' : 'Created opportunity', v.title);
+  });
+  form.elements.pipeline.addEventListener('change', e => {
+    form.elements.stage.innerHTML = PIPES[e.target.value].map(s => `<option>${esc(s)}</option>`).join('');
+  });
+};
+ACT.oppHistory = d => {
+  const o = byId('opps', d.id), acts = S.activities.filter(a => a.oppId === o.id).sort((a, b) => b.at.localeCompare(a.at));
+  modal(o.title, acts.length ? `<ul class="tl">${acts.map(activityLi).join('')}</ul>` : empty('No history yet.'), { size: 'narrow' });
+};
+
+/* ---------- Follow-ups ---------- */
+function pgFollowups() {
+  const t = today(), q = followQueue().filter(f => !UI.fuMine || f.ownerId === me().id);
+  const grp = (title, list) => `<h3 style="font-size:14px;margin:18px 0 10px">${title} <span class="muted" style="font-weight:400">(${list.length})</span></h3>` + table('tbl-fu-' + slug(title), [
+    { l: 'Who', v: f => `<a class="name" href="${f.link}">${esc(f.name)}</a><div class="muted">${f.kind}</div>` },
+    { l: 'Next action', v: f => esc(f.nextAction || '—') }, { l: 'Follow-up', v: f => fmtDate(f.followUp) }, { l: 'Owner', v: f => memberName(f.ownerId) },
+    { l: '', v: f => `<div class="acts-cell">${btn('Log activity', 'logActivity', f.kind === 'Contact' ? { contact: f.id } : { opp: f.id }, 'sm')}</div>` },
+  ], list, { empty: 'Nothing here.', cls: f => f.followUp < t ? 'overdue' : '' });
+  return head('Follow-ups', 'Active contacts and open opportunities with a follow-up date. Archived contacts and closed opportunities drop off.') +
+    `<div class="toolbar"><label class="chk"><input type="checkbox" data-ui="fuMine"${UI.fuMine ? ' checked' : ''}> Only mine</label></div>` +
+    grp('Overdue', q.filter(f => f.followUp < t)) + grp('Today', q.filter(f => f.followUp === t)) + grp('Upcoming', q.filter(f => f.followUp > t));
+}
+
+/* ---------- Programs ---------- */
+function pgPrograms(kind) {
+  const m = me(), t = today();
+  const rows = S.programs.filter(p => p.kind === kind && canSeeProgram(p)).sort((a, b) => a.provider.localeCompare(b.provider));
+  const canEdit = p => p.createdBy === m.id || isAdmin();
+  return head(kind === 'marketing' ? 'Marketing programs' : 'Office directory', kind === 'marketing' ? 'Marketing providers, who owns each account, and when they renew.' : 'Office software and services the firm uses.', btn('Add program', 'editProgram', { kind }, 'primary')) +
+    `<div class="warnbox">Never store passwords, MFA codes, recovery codes or API secrets here. Link to the password manager entry instead.</div>
+    <div class="toolbar">${searchBox('tbl-prog', 'Search programs')}</div>` +
+    table('tbl-prog', [
+      { l: 'Provider', v: p => `<strong>${esc(p.provider)}</strong><div class="muted">${esc(p.purpose || '')}</div>` },
+      { l: 'Business', v: p => esc(p.business || '—') }, { l: 'Account owner', v: p => memberName(p.accountOwner) },
+      { l: 'Billing', v: p => p.amount != null ? `${money(p.amount, p.currency)}<div class="muted">${esc(p.billing || '')}</div>` : esc(p.billing || '—') },
+      { l: 'Renewal', v: p => p.renewal ? (p.renewal >= t && p.renewal <= addDays(30) ? `<strong style="color:var(--warn)">${fmtDate(p.renewal)}</strong>` : fmtDate(p.renewal)) : '—' },
+      { l: 'Status', v: p => sp(p.status) }, { l: 'Visibility', v: p => sp(p.visibility) },
+      { l: 'Links', v: p => [p.signinUrl && ext(p.signinUrl, 'Sign in'), p.website && ext(p.website, 'Website'), p.vaultLink && ext(p.vaultLink, 'Vault')].filter(Boolean).join('<br>') || '—' },
+      { l: '', v: p => `<div class="acts-cell">${btn('Details', 'viewProgram', { id: p.id }, 'sm ghost')}${canEdit(p) ? editBtn('editProgram', p.id) : ''}</div>` },
+    ], rows, { empty: 'No programs visible to you yet.' });
+}
+const PROGRAM_FIELDS = () => [
+  { k: 'provider', l: 'Provider', req: true }, { k: 'purpose', l: 'Purpose' },
+  { k: 'website', l: 'Website', t: 'url' }, { k: 'signinUrl', l: 'Sign-in URL', t: 'url' },
+  { k: 'business', l: 'Business using it', t: 'select', o: BRANDS }, { k: 'accountOwner', l: 'Account owner', t: 'select', o: memberOpts() },
+  { k: 'accountLogin', l: 'Account email or username', help: 'Username only. No passwords.' }, { k: 'vaultLink', l: 'Password manager link', t: 'url' },
+  { k: 'users', l: 'Users and roles', t: 'textarea' }, { k: 'accessInstructions', l: 'Access instructions', t: 'textarea' },
+  { k: 'support', l: 'Support contacts', full: true },
+  { k: 'billing', l: 'Billing cycle', t: 'select', o: ['Monthly', 'Quarterly', 'Annual', 'One-time', 'Free'] },
+  { k: 'amount', l: 'Reference subscription amount', t: 'money', help: 'For reference only. Not posted as an expense.' },
+  { k: 'currency', l: 'Currency', t: 'select', blank: false, o: CURS }, { k: 'renewal', l: 'Renewal date', t: 'date' },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Active', 'Trial', 'Cancelled'] },
+  { k: 'visibility', l: 'Visibility', t: 'select', blank: false, o: ['General', ...(hasFirm() ? ['Firm'] : []), ...(isAdmin() ? ['Administrator'] : [])] },
+];
+ACT.editProgram = d => {
+  const prev = d.id ? byId('programs', d.id) : null;
+  formModal(prev ? 'Edit program' : 'Add program', PROGRAM_FIELDS(), prev || { currency: 'CAD', status: 'Active', visibility: 'General', accountOwner: me().id }, v => {
+    const txt = v.accessInstructions + ' ' + v.users;
+    if (/(password|passcode|pin|mfa|recovery|api key|secret)\s*[:=]\s*\S{4,}/i.test(txt)) return 'This looks like it contains a secret. Keep passwords and codes in the password manager.';
+    upsert('programs', { ...v, kind: prev?.kind || d.kind, id: prev?.id }); log(prev ? 'Updated program' : 'Added program', v.provider, v.visibility === 'Firm' ? 'firm' : 'general');
+  });
+};
+ACT.viewProgram = d => {
+  const p = byId('programs', d.id);
+  modal(p.provider, dl([['Purpose', esc(p.purpose)], ['Business', esc(p.business)], ['Account owner', memberName(p.accountOwner)], ['Account login', esc(p.accountLogin)], ['Users and roles', esc(p.users)], ['Access instructions', esc(p.accessInstructions)], ['Support', esc(p.support)], ['Billing', esc(p.billing) + (p.amount != null ? ' · ' + money(p.amount, p.currency) : '')], ['Renewal', p.renewal ? fmtDate(p.renewal) : ''], ['Status', sp(p.status)], ['Visibility', sp(p.visibility)], ['Website', ext(p.website)], ['Sign in', ext(p.signinUrl)], ['Password manager', ext(p.vaultLink)]]));
+};
+
+/* ---------- Expenses ---------- */
+const EXP_COMMON = () => [
+  { k: 'date', l: 'Expense date', t: 'date', req: true, def: today }, { k: 'provider', l: 'Service provider', req: true },
+  { k: 'description', l: 'Description', full: true },
+  { k: 'category', l: 'Category', t: 'select', o: ['Advertising', 'Software', 'Events', 'Design', 'Printing', 'Travel', 'Professional fees', 'Court and filing fees', 'Medical records', 'Other'] },
+  { k: 'ref', l: 'Invoice or receipt reference' },
+  { k: 'h1', l: 'Amounts', t: 'h' },
+  { k: 'currency', l: 'Currency', t: 'select', req: true, blank: false, o: CURS },
+  { k: 'amount', l: 'Amount before HST', t: 'money', req: true },
+  { k: 'hst', l: 'Actual HST on invoice', t: 'money', help: 'Enter what the invoice shows. No rate is assumed.' },
+  { k: 'receipt', l: 'Receipt or invoice link', t: 'url' },
+  { k: 'h2', l: 'Payment and bookkeeping', t: 'h' },
+  { k: 'payStatus', l: 'Payment', t: 'select', blank: false, o: ['Unpaid', 'Paid', 'Reimbursed', 'Unknown'] }, { k: 'paidDate', l: 'Paid date', t: 'date' },
+  { k: 'payMethod', l: 'Payment method' },
+  { k: 'bookStatus', l: 'Bookkeeping', t: 'select', blank: false, o: ['Not submitted', 'Submitted', 'Reconciled'] }, { k: 'batchRef', l: 'Bookkeeping batch or reference' },
+  { k: 'notes', l: 'Notes', t: 'textarea' },
+];
+const expFilter = scope => UI['exp_' + scope] || {};
+const expMonth = scope => expFilter(scope).month ?? today().slice(0, 7);
+function expenseRows(scope) {
+  const f = expFilter(scope), month = expMonth(scope);
+  return S.expenses.filter(e => e.scope === scope && (!month || e.date.slice(0, 7) === month) && (scope !== 'marketing' || !f.brand || e.brand === f.brand) &&
+    (scope !== 'client' || !f.matter || e.matterId === f.matter) && (!f.q || JSON.stringify([e.provider, e.description, e.ref, e.category, e.notes]).toLowerCase().includes(f.q.toLowerCase())))
+    .sort((a, b) => b.date.localeCompare(a.date));
+}
+function pgExpenses(scope) {
+  const f = expFilter(scope), month = expMonth(scope);
+  const rows = expenseRows(scope), rec = rows.filter(e => e.state !== 'Voided');
+  const sum = k => { const o = {}; rec.forEach(e => { o[e.currency] = (o[e.currency] || 0) + (k === 'total' ? expTotal(e) : (e[k] || 0)); }); return o; };
+  const curs = Object.keys(sum('total'));
+  const foot = rows.length ? `<tfoot>${(curs.length ? curs : ['CAD']).map(c => `<tr><td colspan="4">Recorded total, ${c}</td><td class="num">${money(sum('amount')[c], c)}</td><td class="num">${money(sum('hst')[c], c)}</td><td class="num">${money(sum('total')[c], c)}</td><td colspan="3"></td></tr>`).join('')}</tfoot>` : '';
+  const m = me(), mLabel = month ? fmtMonth(month) : 'All months';
+  return head(scope === 'marketing' ? 'Marketing expenses' : 'Client expenses', scope === 'marketing' ? 'Totals use the actual HST from each invoice. CAD and USD stay separate. Voided rows stay visible but don’t count.' : 'Disbursements linked to a client matter. Firm access only.',
+    btn('Export CSV', 'exportExp', { scope }) + btn('Add expense', 'editExpense', { scope }, 'primary')) +
+    `<div class="toolbar"><input type="month" aria-label="Month" value="${esc(month)}" data-ui="exp_${scope}.month"><button type="button" class="btn sm ghost" data-act="expAll" data-scope="${scope}">All months</button>
+    ${scope === 'marketing' ? `<select data-ui="exp_${scope}.brand" aria-label="Brand"><option value="">All brands</option>${BRANDS.map(b => `<option${b === f.brand ? ' selected' : ''}>${esc(b)}</option>`).join('')}</select>` :
+      `<select data-ui="exp_${scope}.matter" aria-label="Matter"><option value="">All clients and matters</option>${S.matters.map(mt => `<option value="${mt.id}"${mt.id === f.matter ? ' selected' : ''}>${esc(matterLabel(mt))}</option>`).join('')}</select>`}
+    <input type="search" placeholder="Supplier or text, then Enter" aria-label="Search supplier or text" value="${esc(f.q || '')}" data-ui="exp_${scope}.q"></div>
+    <div class="tiles">${(curs.length ? curs : ['CAD']).map(c => `<div class="tile"><div class="k">${mLabel} · ${c} incl. HST</div><div class="v small">${money(sum('total')[c], c)}</div></div>`).join('')}<div class="tile"><div class="k">Unpaid entries</div><div class="v">${rec.filter(e => e.payStatus === 'Unpaid').length}</div></div><div class="tile"><div class="k">Not yet sent to bookkeeping</div><div class="v">${rec.filter(e => e.bookStatus === 'Not submitted').length}</div></div></div>` +
+    table('tbl-exp-' + scope, [
+      { l: 'Date', v: e => fmtDate(e.date) },
+      { l: 'Provider', v: e => `<strong>${esc(e.provider)}</strong><div class="muted">${esc(e.description || '')}${e.ref ? ' · ' + esc(e.ref) : ''}</div>` },
+      { l: 'Category', v: e => esc(e.category || '—') },
+      scope === 'marketing' ? { l: 'Brand / campaign', v: e => esc(e.brand) + (e.campaignId ? `<div class="muted">${nameOf('campaigns', e.campaignId)}</div>` : '') } : { l: 'File', v: e => { const mt = byId('matters', e.matterId); return mt ? `<a href="#/client/${mt.clientId}">${esc(matterLabel(mt))}</a>` : '—'; } },
+      { l: 'Before HST', num: true, v: e => money(e.amount, e.currency) }, { l: 'HST', num: true, v: e => money(e.hst, e.currency) }, { l: 'Total', num: true, v: e => `<strong>${money(expTotal(e), e.currency)}</strong>` },
+      { l: 'Payment', v: e => sp(e.payStatus) + (e.paidDate ? `<div class="muted">${fmtDate(e.paidDate)}</div>` : '') },
+      { l: 'Bookkeeping', v: e => e.state === 'Voided' ? `${sp('Voided')}<div class="muted">${esc(e.voidReason)}</div>` : sp(e.bookStatus) + (e.batchRef ? `<div class="muted">${esc(e.batchRef)}</div>` : '') },
+      { l: '', v: e => `<div class="acts-cell">${e.receipt ? ext(e.receipt, 'Receipt') : ''}${e.state !== 'Voided' && (e.createdBy === m.id || isAdmin()) ? editBtn('editExpense', e.id) + btn('Void', 'voidExpense', { id: e.id }, 'sm danger') : ''}</div>` },
+    ], rows, { empty: 'No expenses for these filters.', cls: e => e.state === 'Voided' ? 'voided' : '', foot });
+}
+ACT.expAll = d => { UI['exp_' + d.scope] = { ...expFilter(d.scope), month: '' }; render(); };
+ACT.editExpense = d => {
+  const prev = d.id ? byId('expenses', d.id) : null, scope = prev?.scope || d.scope;
+  const extra = scope === 'marketing' ? [{ k: 'h0', l: 'Ledger link', t: 'h' }, { k: 'brand', l: 'Brand', t: 'select', req: true, o: BRANDS }, { k: 'campaignId', l: 'Campaign', t: 'select', o: campaignOpts }]
+    : [{ k: 'h0', l: 'Ledger link', t: 'h' }, { k: 'matterId', l: 'Client matter', t: 'select', req: true, o: matterOpts, full: true }];
+  formModal(prev ? 'Edit expense' : 'Add expense', [...extra, ...EXP_COMMON()], prev || { currency: 'CAD', payStatus: 'Unpaid', bookStatus: 'Not submitted', hst: 0 }, v => {
+    if (prev && prev.createdBy !== me().id && !isAdmin()) return 'Only the creator or an administrator can edit this expense.';
+    if (['Paid', 'Reimbursed'].includes(v.payStatus) && !v.paidDate) return 'Add the paid date.';
+    if (v.hst == null) v.hst = 0;
+    upsert('expenses', { ...v, scope, state: prev?.state || 'Recorded', id: prev?.id });
+    log(prev ? 'Updated expense' : 'Recorded expense', `${v.provider}, ${money(v.amount + v.hst, v.currency)}`, scope === 'client' ? 'firm' : 'general');
+  });
+};
+ACT.voidExpense = d => {
+  const e = byId('expenses', d.id);
+  formModal('Void expense', [{ k: 'reason', l: 'Reason for voiding', req: true, t: 'textarea' }], null, v => {
+    Object.assign(e, { state: 'Voided', voidReason: v.reason, voidedBy: me().id, voidedAt: nowISO(), rev: (e.rev || 1) + 1 });
+    log('Voided expense', e.provider, e.scope === 'client' ? 'firm' : 'general');
+  }, { size: 'narrow', submitLabel: 'Void expense', intro: `<p style="margin-top:0">${esc(e.provider)} · ${money(expTotal(e), e.currency)}. The row stays in the history and exports but stops counting toward totals.</p>` });
+};
+function csvCell(v) { let s = String(v ?? ''); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+ACT.exportExp = d => {
+  const scope = d.scope, rows = expenseRows(scope);
+  const hdr = ['Date', 'Provider', 'Description', 'Category', 'Reference', scope === 'marketing' ? 'Brand' : 'File number', scope === 'marketing' ? 'Campaign' : 'Client', 'Currency', 'Amount before HST', 'HST', 'Total incl HST', 'Payment', 'Paid date', 'Payment method', 'Bookkeeping', 'Batch', 'Receipt', 'State', 'Void reason'];
+  const lines = [hdr, ...rows.map(e => { const mt = byId('matters', e.matterId); return [e.date, e.provider, e.description, e.category, e.ref, scope === 'marketing' ? e.brand : mt?.fileNumber, scope === 'marketing' ? byId('campaigns', e.campaignId)?.name : byId('clients', mt?.clientId)?.name, e.currency, (e.amount / 100).toFixed(2), ((e.hst || 0) / 100).toFixed(2), (expTotal(e) / 100).toFixed(2), e.payStatus, e.paidDate, e.payMethod, e.bookStatus, e.batchRef, e.receipt, e.state, e.voidReason]; })];
+  Object.entries(sumByCur(rows.filter(e => e.state !== 'Voided'))).forEach(([c, v]) => lines.push(['Grand total (recorded)', '', '', '', '', '', '', c, '', '', (v / 100).toFixed(2)]));
+  download(`momentum-${scope}-expenses-${expMonth(scope) || 'all-months'}.csv`, lines.map(r => r.map(csvCell).join(',')).join('\r\n'), 'text/csv');
+  log('Exported expense CSV', scope + ' ledger', scope === 'client' ? 'firm' : 'general'); save();
+};
+
+/* ---------- Clients & matters ---------- */
+const CLIENT_FIELDS = [
+  { k: 'name', l: 'Full name', req: true }, { k: 'dob', l: 'Date of birth', t: 'date' },
+  { k: 'email', l: 'Email', t: 'email' }, { k: 'phone', l: 'Phone', t: 'tel' },
+  { k: 'address', l: 'Address', t: 'textarea' }, { k: 'instructions', l: 'Contact instructions', t: 'textarea' },
+];
+function pgClients() {
+  const rows = S.clients.slice().sort((a, b) => a.name.localeCompare(b.name));
+  return head('Client directory', 'Search by name, contact details, birth date or file number. A client can have open and closed files at the same time.', btn('Add client', 'editClient', {}, 'primary')) +
+    `<div class="toolbar">${searchBox('tbl-cl', 'Search clients and file numbers')}</div>` +
+    table('tbl-cl', [
+      { l: 'Client', v: c => `<a class="name" href="#/client/${c.id}">${esc(c.name)}</a><div class="muted">${esc(c.email || '')}</div>` },
+      { l: 'Phone', v: c => esc(c.phone || '—') }, { l: 'Date of birth', v: c => c.dob ? `${fmtDate(c.dob)}<span class="sr"> ${c.dob}</span>` : '—' },
+      { l: 'Files', v: c => S.matters.filter(mt => mt.clientId === c.id).map(mt => `${esc(mt.fileNumber)} ${sp(mt.status)}`).join('<br>') || '<span class="muted">No files</span>' },
+      { l: 'File status', v: c => { const ms = S.matters.filter(mt => mt.clientId === c.id); return ms.some(x => x.status === 'Open') ? sp('Open') : ms.length ? sp('Closed') : '—'; } },
+    ], rows);
+}
+ACT.editClient = d => {
+  const prev = d.id ? byId('clients', d.id) : null;
+  formModal(prev ? 'Edit client' : 'Add client', CLIENT_FIELDS, prev, v => {
+    const dup = S.clients.find(c => c.id !== prev?.id && ((v.email && (c.email || '').toLowerCase() === v.email.toLowerCase()) || (c.name.toLowerCase() === v.name.toLowerCase() && v.dob && c.dob === v.dob)));
+    if (dup) return `Possible duplicate: ${dup.name} (Client ID ${dup.id}). Open that profile instead.`;
+    const r = upsert('clients', { ...v, id: prev?.id }); log(prev ? 'Updated client' : 'Created client', r.name, 'firm');
+  });
+};
+const MATTER_FIELDS = () => [
+  { k: 'fileNumber', l: 'File number', req: true }, { k: 'caseType', l: 'Case type', t: 'select', req: true, o: CASE_TYPES },
+  { k: 'lossDate', l: 'Date of loss', t: 'date' }, { k: 'lawyerId', l: 'Responsible lawyer', t: 'select', req: true, o: counselOpts },
+  { k: 'staffId', l: 'Assigned staff', t: 'select', o: memberOpts(true) },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Open', 'Closed'] },
+  { k: 'opened', l: 'Opened', t: 'date', def: today }, { k: 'closed', l: 'Closed date', t: 'date', help: 'Required to close. Clear it to reopen.' },
+  { k: 'closingReason', l: 'Closing reason', full: true }, { k: 'boxLink', l: 'Box folder link', t: 'url', full: true },
+  { k: 'notes', l: 'Notes', t: 'textarea' },
+];
+ACT.editMatter = d => {
+  const prev = d.id ? byId('matters', d.id) : null;
+  formModal(prev ? 'Edit matter ' + prev.fileNumber : 'Add matter', MATTER_FIELDS(), prev || { status: 'Open', lawyerId: 'l1' }, v => {
+    if (S.matters.some(mt => mt.id !== prev?.id && mt.fileNumber.toLowerCase() === v.fileNumber.toLowerCase())) return `File number ${v.fileNumber} is already in use.`;
+    if (v.status === 'Closed' && !v.closed) return 'Closing a file needs a closed date.';
+    if (v.status === 'Open' && v.closed) return 'Clear the closed date to reopen this file.';
+    if (v.closed && v.opened && v.closed < v.opened) return 'The closed date can’t be before the opened date.';
+    upsert('matters', { ...v, clientId: prev?.clientId || d.client, id: prev?.id }); log(prev ? 'Updated matter' : 'Opened matter', v.fileNumber, 'firm');
+  });
+};
+function pgClient(id) {
+  const c = byId('clients', id);
+  if (!c) return head('Client not found', '', '', '<a href="#/clients">← Client directory</a>');
+  const ms = S.matters.filter(mt => mt.clientId === id);
+  const exps = S.expenses.filter(e => e.scope === 'client' && e.state !== 'Voided' && ms.some(mt => mt.id === e.matterId));
+  return head(c.name, `Client ID <code>${esc(c.id)}</code>`, editBtn('editClient', id, 'Edit profile'), '<a href="#/clients">← Client directory</a>') +
+    `<section class="card">${dl([['Email', esc(c.email)], ['Phone', esc(c.phone)], ['Date of birth', c.dob ? fmtDate(c.dob) : ''], ['Address', esc(c.address)], ['Contact instructions', esc(c.instructions)], ['Client disbursements (incl. HST)', esc(curList(sumByCur(exps)))]])}</section>
+    <section class="card"><h3>Matters ${btn('Add matter', 'editMatter', { client: id }, 'sm primary')}</h3>${table('tbl-mt', [
+      { l: 'File', v: mt => `<strong>${esc(mt.fileNumber)}</strong><div class="muted">${esc(mt.caseType)}</div>` },
+      { l: 'Date of loss', v: mt => fmtDate(mt.lossDate) }, { l: 'Lawyer', v: mt => nameOf('counsel', mt.lawyerId) }, { l: 'Staff', v: mt => memberName(mt.staffId) },
+      { l: 'Status', v: mt => sp(mt.status) + (mt.closed ? `<div class="muted">Closed ${fmtDate(mt.closed)}${mt.closingReason ? ' · ' + esc(mt.closingReason) : ''}</div>` : `<div class="muted">Opened ${fmtDate(mt.opened)}</div>`) },
+      { l: 'Opening checklist', v: mt => { const items = S.checklist.filter(x => x.matterId === mt.id); return items.length ? `${items.filter(x => ['Complete', 'Not applicable'].includes(x.status)).length} of ${items.length} resolved` : '<span class="muted">Not started</span>'; } },
+      { l: '', v: mt => `<div class="acts-cell">${mt.boxLink ? ext(mt.boxLink, 'Box') : ''}<a class="btn sm" href="#/checklist/${mt.id}">View opening checklist</a>${editBtn('editMatter', mt.id)}</div>` },
+    ], ms, { empty: 'No matters yet.' })}</section>`;
+}
+
+/* ---------- Opening checklist ---------- */
+function pgChecklist(matterId) {
+  const mt = byId('matters', matterId);
+  if (!mt) return head('Matter not found', '', '', '<a href="#/clients">← Client directory</a>');
+  const items = CHECKLIST.map(([k]) => S.checklist.find(x => x.matterId === matterId && x.item === k)).filter(Boolean);
+  const client = byId('clients', mt.clientId);
+  return head('Opening checklist', `${esc(mt.fileNumber)} · ${esc(client?.name)} · ${esc(mt.caseType)}`, items.length < CHECKLIST.length ? btn(items.length ? 'Add missing items' : 'Start checklist', 'startChecklist', { id: matterId }, 'primary') : '', `<a href="#/client/${mt.clientId}">← ${esc(client?.name)}</a>`) +
+    `<div class="infobox">These prompts record staff review. They don’t decide whether legal obligations are met, calculate dates, or send records requests.</div>` +
+    (items.length ? table('tbl-chk', [
+      { l: 'Item', v: x => `<strong>${esc(x.item)}</strong><div class="muted">${esc(CHECKLIST.find(c => c[0] === x.item)[1])}</div>` },
+      { l: 'Status', v: x => sp(x.status) }, { l: 'Assignee', v: x => x.assigneeId ? memberName(x.assigneeId) : '—' },
+      { l: 'Notes and evidence', v: x => ((x.notes ? `<div style="white-space:pre-wrap">${esc(x.notes)}</div>` : '') + (x.evidence ? ext(x.evidence, 'Evidence') : '')) || '<span class="muted">—</span>' },
+      { l: 'Completed', v: x => x.completedBy ? `${esc(x.completedBy)}<div class="muted">${fmtDT(x.completedAt)}</div>` : '—' },
+      { l: 'Last update', v: x => x.updatedByName ? `${esc(x.updatedByName)}<div class="muted">${fmtDT(x.updatedAt)}</div>` : '—' },
+      { l: '', v: x => `<div class="acts-cell">${editBtn('editCheck', x.id, 'Update')}</div>` },
+    ], items) : empty('This checklist hasn’t been started. Select Start checklist to create the eight default items.'));
+}
+ACT.startChecklist = d => {
+  let added = 0;
+  CHECKLIST.forEach(([k]) => { if (!S.checklist.some(x => x.matterId === d.id && x.item === k)) { S.checklist.push({ id: uid(), matterId: d.id, item: k, status: 'Not started', rev: 1 }); added++; } });
+  log('Started opening checklist', byId('matters', d.id).fileNumber, 'firm'); save(); render(); toast(`${added} items added. Existing progress kept.`);
+};
+ACT.editCheck = d => {
+  const x = byId('checklist', d.id), openedRev = x.rev;
+  formModal(x.item, [
+    { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Not started', 'In progress', 'Complete', 'Not applicable'] },
+    { k: 'assigneeId', l: 'Assignee', t: 'select', o: memberOpts(true) },
+    { k: 'notes', l: 'Review notes', t: 'textarea', help: 'Required for Complete or Not applicable.' },
+    { k: 'evidence', l: 'Evidence or Box link', t: 'url', full: true },
+  ], x, v => {
+    const cur = byId('checklist', d.id);
+    if (cur.rev !== openedRev) return 'Someone saved this item after you opened it. Close and reopen it to see the latest version.';
+    if (['Complete', 'Not applicable'].includes(v.status) && !v.notes) return 'Add a note explaining the review or the reason.';
+    if (v.assigneeId) { const a = byId('members', v.assigneeId); if (!a?.active || !hasFirm(a)) return 'Assignees must be active staff with firm access.'; }
+    const resolved = s => ['Complete', 'Not applicable'].includes(s);
+    if (resolved(v.status) && !resolved(cur.status)) { cur.completedBy = me().name; cur.completedAt = nowISO(); }
+    if (!resolved(v.status)) { cur.completedBy = null; cur.completedAt = null; }
+    Object.assign(cur, v, { updatedByName: me().name, updatedAt: nowISO(), rev: cur.rev + 1 });
+    log('Updated checklist: ' + cur.item, byId('matters', cur.matterId).fileNumber, 'firm');
+  }, { size: 'narrow' });
+};
+
+/* ---------- PNC tracker ---------- */
+const PNC_FIELDS = () => [
+  { k: 'h1', l: 'Contact and source', t: 'h' },
+  { k: 'name', l: 'Name', req: true }, { k: 'dob', l: 'Date of birth', t: 'date' },
+  { k: 'phone', l: 'Phone', t: 'tel' }, { k: 'email', l: 'Email', t: 'email' },
+  { k: 'address', l: 'Address', full: true },
+  { k: 'preferredContact', l: 'Preferred contact', t: 'select', o: ['Phone', 'Email', 'Text'] },
+  { k: 'source', l: 'Source', t: 'select', o: ['Website', 'Referral', 'Google', 'Social', 'Event', 'Podcast', 'Other'] },
+  { k: 'referrer', l: 'Referring person or campaign', full: true },
+  { k: 'h2', l: 'Intake and responsibility', t: 'h' },
+  { k: 'caseType', l: 'Case type', t: 'select', o: CASE_TYPES }, { k: 'lossDate', l: 'Date of loss', t: 'date' },
+  { k: 'firstContact', l: 'First contact', t: 'date', def: today }, { k: 'urgency', l: 'Urgency', t: 'select', blank: false, o: ['Low', 'Normal', 'High', 'Urgent'], def: 'Normal' },
+  { k: 'intakeStaffId', l: 'Intake staff', t: 'select', o: memberOpts(true) }, { k: 'assignedStaffId', l: 'Assigned staff', t: 'select', o: memberOpts(true) },
+  { k: 'summary', l: 'Summary', t: 'textarea' },
+  { k: 'opposingParty', l: 'Opposing party' }, { k: 'jurisdiction', l: 'Jurisdiction' },
+  { k: 'h3', l: 'Lending and property', t: 'h' },
+  { k: 'propertyAddress', l: 'Property address', full: true }, { k: 'lendingCompany', l: 'Company' },
+  { k: 'loanAmount', l: 'Loan amount', t: 'money' }, { k: 'lenderOrBorrower', l: 'Lender or borrower', t: 'select', o: ['Lender', 'Borrower'] },
+  { k: 'closingDate', l: 'Closing date', t: 'date' }, { k: 'licenceType', l: 'Licence type' },
+  { k: 'h4', l: 'Follow-ups and dates', t: 'h' },
+  { k: 'nextAction', l: 'Next action' }, { k: 'followUp', l: 'Follow-up date', t: 'date' },
+  { k: 'limitationDate', l: 'Limitation date (manually verified)', t: 'date' }, { k: 'noticeDate', l: 'Notice date (manually verified)', t: 'date' },
+  { k: 'verifiedBy', l: 'Verified by' }, { k: 'verifiedBasis', l: 'Verification basis' },
+  { k: 'h5', l: 'Status', t: 'h' },
+  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['New', 'Contacting', 'Consult booked', 'Not retained', 'Closed'], help: 'Retained and Referred are set through their own workflows.' },
+  { k: 'nonRetainerSent', l: 'Non-retainer letter sent', t: 'date' }, { k: 'letterLink', l: 'Letter link', t: 'url' },
+  { k: 'closingReason', l: 'Closing reason' },
+];
+function pgPncs() {
+  const st = UI.pncStatus || 'Active', t = today();
+  const rows = S.pncs.filter(p => st === 'All' || (st === 'Active' ? !PNC_DONE.includes(p.status) : p.status === st)).sort((a, b) => (a.followUp || '9').localeCompare(b.followUp || '9'));
+  return head('PNC tracker', 'Potential new clients, from first contact to retainer, referral or non-retainer.', btn('Add PNC', 'editPnc', {}, 'primary')) +
+    `<div class="tabs">${['Active', 'New', 'Contacting', 'Consult booked', 'Retained', 'Referred', 'Not retained', 'Closed', 'All'].map(s => `<button type="button" class="${s === st ? 'on' : ''}" aria-pressed="${s === st}" data-act="setui" data-k="pncStatus" data-v="${s}">${s}</button>`).join('')}</div>
+    <div class="toolbar">${searchBox('tbl-pnc', 'Search PNCs')}</div>` +
+    table('tbl-pnc', [
+      { l: 'Name', v: p => `<a class="name" href="#/pnc/${p.id}">${esc(p.name)}</a><div class="muted">${esc(p.phone || p.email || '')}</div>` },
+      { l: 'Case type', v: p => esc(p.caseType || '—') }, { l: 'Source', v: p => esc(p.source || '—') }, { l: 'Urgency', v: p => sp(p.urgency) },
+      { l: 'Assigned', v: p => memberName(p.assignedStaffId) }, { l: 'Status', v: p => sp(p.status) },
+      { l: 'Next action', v: p => p.nextAction ? `${esc(p.nextAction)}<div class="muted">${fmtDate(p.followUp)}</div>` : '—' },
+      { l: 'Attempts', num: true, v: p => S.attempts.filter(a => a.pncId === p.id).length },
+    ], rows, { empty: 'No PNCs match.', cls: p => p.followUp && p.followUp < t && !PNC_DONE.includes(p.status) ? 'overdue' : '' });
+}
+ACT.editPnc = d => {
+  const prev = d.id ? byId('pncs', d.id) : null;
+  formModal(prev ? 'Edit PNC' : 'Add PNC', PNC_FIELDS(), prev || { status: 'New', urgency: 'Normal', intakeStaffId: me().id }, v => {
+    if ((v.limitationDate || v.noticeDate) && (!v.verifiedBy || !v.verifiedBasis)) return 'Legal dates must be manually verified. Add who verified them and the basis.';
+    if (v.status === 'Not retained' && !v.closingReason) return 'Add a reason for the non-retainer.';
+    if (prev && ['Retained', 'Referred'].includes(prev.status)) v.status = prev.status;
+    const r = upsert('pncs', { ...v, id: prev?.id }); log(prev ? 'Updated PNC' : 'Created PNC', 'PNC: ' + r.name, 'firm');
+  }, { note: 'Momentum doesn’t calculate limitation or notice periods. Enter only dates a lawyer has verified.' });
+};
+function pgPnc(id) {
+  const p = byId('pncs', id);
+  if (!p) return head('PNC not found', '', '', '<a href="#/pncs">← PNC tracker</a>');
+  const at = S.attempts.filter(a => a.pncId === id).sort((a, b) => b.at.localeCompare(a.at));
+  const lawyer = p.receivingLawyerId && byId('counsel', p.receivingLawyerId);
+  const consentOk = p.consentDate && p.consentLawyerId === p.receivingLawyerId;
+  return head(p.name, `PNC ID <code>${esc(p.id)}</code> · ${sp(p.status)} ${sp(p.urgency)}`, p.status === 'Retained' ? '' : editBtn('editPnc', id, 'Edit intake'), '<a href="#/pncs">← PNC tracker</a>') +
+    `<section class="card"><div class="dl-h">Contact and source</div>${dl([['Phone', esc(p.phone)], ['Email', esc(p.email)], ['Date of birth', p.dob ? fmtDate(p.dob) : ''], ['Address', esc(p.address)], ['Preferred contact', esc(p.preferredContact)], ['Source', esc(p.source)], ['Referred by', esc(p.referrer)]])}
+      <div class="dl-h">Intake</div>${dl([['Case type', esc(p.caseType)], ['Date of loss', p.lossDate ? fmtDate(p.lossDate) : ''], ['First contact', p.firstContact ? fmtDate(p.firstContact) : ''], ['Intake staff', memberName(p.intakeStaffId)], ['Assigned staff', memberName(p.assignedStaffId)], ['Opposing party', esc(p.opposingParty)], ['Jurisdiction', esc(p.jurisdiction)], ['Summary', esc(p.summary)]])}
+      ${p.propertyAddress || p.lendingCompany || p.loanAmount ? `<div class="dl-h">Lending and property</div>${dl([['Property', esc(p.propertyAddress)], ['Company', esc(p.lendingCompany)], ['Loan amount', p.loanAmount != null ? money(p.loanAmount) : ''], ['Lender or borrower', esc(p.lenderOrBorrower)], ['Closing date', p.closingDate ? fmtDate(p.closingDate) : ''], ['Licence type', esc(p.licenceType)]])}` : ''}
+      <div class="dl-h">Follow-ups and dates</div>${dl([['Next action', esc(p.nextAction)], ['Follow-up', p.followUp ? fmtDate(p.followUp) : ''], ['Limitation date', p.limitationDate ? fmtDate(p.limitationDate) : ''], ['Notice date', p.noticeDate ? fmtDate(p.noticeDate) : ''], ['Verified by', esc(p.verifiedBy)], ['Basis', esc(p.verifiedBasis)]])}
+      ${p.nonRetainerSent || p.closingReason ? `<div class="dl-h">Closure</div>${dl([['Non-retainer sent', p.nonRetainerSent ? fmtDate(p.nonRetainerSent) : ''], ['Letter', p.letterLink ? ext(p.letterLink) : ''], ['Reason', esc(p.closingReason)]])}` : ''}</section>
+    <section class="card"><h3>Contact attempts ${btn('Log attempt', 'logAttempt', { id }, 'sm primary')}</h3>${table('tbl-att', [
+      { l: 'When', v: a => fmtDT(a.at) }, { l: 'Method', v: a => esc(a.method) }, { l: 'Outcome', v: a => esc(a.outcome) }, { l: 'Notes', v: a => esc(a.notes || '—') },
+      { l: 'Staff', v: a => a.importedStaff ? `${esc(a.importedStaff)} ${pill('Imported')}<div class="muted">Imported by ${memberName(a.actor)}</div>` : memberName(a.actor) },
+    ], at, { empty: 'No contact attempts logged.' })}</section>
+    <div class="cols2"><section class="card"><h3>Referral ${p.status === 'Retained' ? '' : btn('Edit referral', 'editReferral', { id }, 'sm')}</h3>
+      ${dl([['Receiving lawyer', lawyer ? esc(lawyer.name + (lawyer.firm ? ', ' + lawyer.firm : '')) : ''], ['Consent date', consentOk ? fmtDate(p.consentDate) : (p.receivingLawyerId ? '<span style="color:var(--bad)">Needs dated consent for this lawyer</span>' : '')], ['Consent evidence', esc(p.consentEvidence)], ['Outcome', esc(p.referralOutcome)], ['Fee review notes', esc(p.feeNotes)]])}
+      <div style="margin-top:12px">${btn('Prepare referral summary', 'refSummary', { id }, 'sm')}</div><p class="note">Preparing or copying a summary sends nothing. Fee fields record a lawyer’s review; Momentum doesn’t check fee compliance.</p></section>
+    <section class="card"><h3>Open a client file</h3>${p.convertedMatterId ? `<p style="margin-top:0">Converted to <a href="#/client/${p.convertedClientId}">${nameOf('clients', p.convertedClientId)}</a>, file <strong>${nameOf('matters', p.convertedMatterId, 'fileNumber')}</strong>. Retainer signed ${fmtDate(p.retainerDate)}.</p><p class="note">The intake details and contact history stay on this PNC.</p>` :
+      p.status === 'Referred' ? '<p class="muted" style="margin:0">This PNC was referred out.</p>' :
+      `<p style="margin-top:0" class="muted">Record the signed retainer, retainer date, responsible lawyer and a unique file number. The intake and contact history are kept.</p>${btn('Convert to client file', 'convertPnc', { id }, 'accent')}`}</section></div>`;
+}
+ACT.logAttempt = d => {
+  formModal('Log contact attempt', [
+    { k: 'at', l: 'Actual date and time', t: 'datetime', req: true, def: localNow },
+    { k: 'method', l: 'Method', t: 'select', req: true, o: ['Call', 'Email', 'Voicemail', 'Text', 'Meeting', 'Other'] },
+    { k: 'outcome', l: 'Outcome', t: 'select', req: true, o: ['Reached', 'No answer', 'Left message', 'Wrong number', 'Consult booked', 'Other'] },
+    { k: 'notes', l: 'Notes', t: 'textarea' },
+  ], null, v => {
+    if (new Date(v.at) > new Date(Date.now() + 5 * 60000)) return 'Log attempts after they happen. The time can’t be in the future.';
+    S.attempts.push({ id: uid(), pncId: d.id, at: new Date(v.at).toISOString(), method: v.method, outcome: v.outcome, notes: v.notes, actor: me().id });
+    const p = byId('pncs', d.id); if (p.status === 'New') p.status = 'Contacting';
+    log('Logged contact attempt', 'PNC: ' + p.name, 'firm');
+  }, { size: 'narrow' });
+};
+ACT.editReferral = d => {
+  const p = byId('pncs', d.id);
+  formModal('Referral', [
+    { k: 'receivingLawyerId', l: 'Receiving lawyer', t: 'select', o: counselOpts, full: true },
+    { k: 'consentDate', l: 'Consent date', t: 'date', help: 'Consent must name this specific lawyer.' }, { k: 'consentEvidence', l: 'Consent evidence' },
+    { k: 'referralOutcome', l: 'Outcome', t: 'select', o: ['Pending', 'Accepted', 'Declined'] }, { k: 'referralReason', l: 'Outcome reason' },
+    { k: 'feeNotes', l: 'Fee review notes', t: 'textarea' },
+    { k: 'markReferred', l: 'Status', t: 'check', cl: 'Referral accepted; mark this PNC as Referred' },
+  ], { ...p, markReferred: p.status === 'Referred' }, v => {
+    const lawyerChanged = v.receivingLawyerId !== (p.receivingLawyerId || '');
+    const consentChanged = v.consentDate !== (p.consentDate || '');
+    let cleared = false;
+    if (lawyerChanged && p.consentDate && !consentChanged) { v.consentDate = ''; v.consentEvidence = ''; cleared = true; }
+    if (v.markReferred && (!v.consentDate || !v.receivingLawyerId)) return cleared ? 'You changed the lawyer, so enter a fresh consent date for the new lawyer.' : 'An identified referral needs dated consent for the selected lawyer.';
+    const { markReferred, ...rest } = v;
+    Object.assign(p, rest, { consentLawyerId: v.consentDate ? v.receivingLawyerId : null, status: markReferred ? 'Referred' : (p.status === 'Referred' ? 'Consult booked' : p.status), rev: (p.rev || 1) + 1 });
+    log('Updated referral', 'PNC: ' + p.name, 'firm');
+    if (cleared) setTimeout(() => toast('The lawyer changed, so the earlier consent was cleared. Record fresh consent.'), 50);
+  }, { size: 'narrow' });
+};
+ACT.refSummary = d => {
+  const p = byId('pncs', d.id);
+  if (!p.receivingLawyerId || !p.consentDate || p.consentLawyerId !== p.receivingLawyerId) return alertBox('An identified referral summary needs dated consent tied to the selected receiving lawyer. Edit the referral first.');
+  const l = byId('counsel', p.receivingLawyerId);
+  const txt = `Referral summary for ${l.name}${l.firm ? ', ' + l.firm : ''}\n\nName: ${p.name}\nPhone: ${p.phone || '—'}\nEmail: ${p.email || '—'}\nCase type: ${p.caseType || '—'}\nDate of loss: ${p.lossDate || '—'}\nJurisdiction: ${p.jurisdiction || '—'}\nUrgency: ${p.urgency || '—'}\n\n${p.summary || ''}\n\nConsent to share with ${l.name} given ${p.consentDate}${p.consentEvidence ? ' (' + p.consentEvidence + ')' : ''}.`;
+  modal('Referral summary', `<textarea readonly rows="16" aria-label="Referral summary" style="width:100%;font:inherit;padding:10px;border:1px solid var(--line);border-radius:8px">${esc(txt)}</textarea><p class="note">Nothing has been sent. Copy this into your own email if you choose to send it.</p>`, { extraButtons: btn('Copy', 'copy', { text: txt }) });
+};
+ACT.convertPnc = d => {
+  const p = byId('pncs', d.id);
+  const cands = S.clients.filter(c => (p.email && (c.email || '').toLowerCase() === p.email.toLowerCase()) || c.name.toLowerCase() === p.name.toLowerCase());
+  const conflict = ['Not retained', 'Closed'].includes(p.status) || p.nonRetainerSent;
+  const fields = [
+    ...(conflict ? [{ k: 'conflictOk', l: 'Prior status review', t: 'check', req: true, full: true, cl: `I reviewed the ${p.nonRetainerSent ? 'non-retainer letter' : 'closed intake'} before opening this file` }] : []),
+    ...(cands.length ? [{ k: 'linkClient', l: 'Possible existing client', t: 'select', req: true, full: true, ph: 'Choose an option', o: [...cands.map(c => [c.id, `Link to ${c.name} (ID ${c.id}, DOB ${c.dob || '—'}, ${c.email || 'no email'})`]), ['new', 'Create a new client anyway']] }] : []),
+    { k: 'retainerSigned', l: 'Signed retainer', t: 'check', req: true, cl: 'Retainer is signed' },
+    { k: 'retainerDate', l: 'Retainer date', t: 'date', req: true },
+    { k: 'lawyerId', l: 'Responsible lawyer', t: 'select', req: true, o: counselOpts },
+    { k: 'fileNumber', l: 'File number', req: true },
+    { k: 'caseType', l: 'Case type', t: 'select', req: true, o: CASE_TYPES },
+  ];
+  formModal('Convert to client file', fields, { caseType: p.caseType, lawyerId: 'l1' }, v => {
+    if (S.matters.some(mt => mt.fileNumber.toLowerCase() === v.fileNumber.toLowerCase())) return `File number ${v.fileNumber} is already in use.`;
+    const client = cands.length && v.linkClient !== 'new' ? byId('clients', v.linkClient) : upsert('clients', { name: p.name, email: p.email, phone: p.phone, dob: p.dob, address: p.address });
+    const mt = upsert('matters', { clientId: client.id, fileNumber: v.fileNumber, caseType: v.caseType, lossDate: p.lossDate, lawyerId: v.lawyerId, staffId: p.assignedStaffId, status: 'Open', opened: today(), notes: 'Opened from PNC ' + p.id });
+    Object.assign(p, { status: 'Retained', retainerSigned: true, retainerDate: v.retainerDate, responsibleLawyerId: v.lawyerId, convertedClientId: client.id, convertedMatterId: mt.id });
+    log('Converted PNC to file', `${p.name} → ${v.fileNumber}`, 'firm');
+  }, { size: 'narrow', submitLabel: 'Open client file', intro: cands.length ? `<div class="warnbox">${cands.length} existing client${cands.length > 1 ? 's look' : ' looks'} like a match. Choose one to link, or confirm a new client.</div>` : '' });
+};
+
+/* ---------- Lawyer directory ---------- */
+function pgCounsel() {
+  return head('Lawyer directory', 'Responsible and receiving lawyers.', btn('Add lawyer', 'editCounsel', {}, 'primary')) +
+    `<div class="toolbar">${searchBox('tbl-law', 'Search lawyers')}</div>` +
+    table('tbl-law', [
+      { l: 'Lawyer', v: l => `<strong>${esc(l.name)}</strong><div class="muted">${esc(l.firm || '')}</div>` },
+      { l: 'Contact', v: l => [l.email, l.phone].filter(Boolean).map(esc).join('<br>') || '—' },
+      { l: 'Practice areas', v: l => esc(l.practice || '—') }, { l: 'Jurisdictions', v: l => esc(l.jurisdictions || '—') },
+      { l: 'Open files', num: true, v: l => S.matters.filter(mt => mt.lawyerId === l.id && mt.status === 'Open').length },
+      { l: '', v: l => `<div class="acts-cell">${editBtn('editCounsel', l.id)}</div>` },
+    ], S.counsel);
+}
+ACT.editCounsel = d => {
+  const prev = d.id ? byId('counsel', d.id) : null;
+  formModal(prev ? 'Edit lawyer' : 'Add lawyer', [
+    { k: 'name', l: 'Name', req: true }, { k: 'firm', l: 'Firm' }, { k: 'email', l: 'Email', t: 'email' }, { k: 'phone', l: 'Phone', t: 'tel' },
+    { k: 'practice', l: 'Practice areas', full: true }, { k: 'jurisdictions', l: 'Jurisdictions', full: true },
+    { k: 'terms', l: 'Referral terms notes', t: 'textarea' }, { k: 'notes', l: 'Notes', t: 'textarea' },
+  ], prev, v => { upsert('counsel', { ...v, id: prev?.id }); log(prev ? 'Updated lawyer' : 'Added lawyer', v.name, 'firm'); });
+};
+
+/* ---------- Imports ---------- */
+const IMPORT_TARGETS = {
+  contacts: { l: 'Marketing contacts', firm: false, div: 'marketing', cols: ['name', 'email', 'phone', 'company', 'role', 'source', 'notes'] },
+  dcontacts: { l: 'Division contacts', firm: false, cols: ['name', 'email', 'phone', 'organization', 'role', 'notes'] },
+  clients: { l: 'Client directory', firm: true, cols: ['name', 'email', 'phone', 'dob', 'address', 'instructions'] },
+  matters: { l: 'Matters', firm: true, cols: ['client', 'dob', 'fileNumber', 'caseType', 'lawyer', 'lossDate', 'status', 'opened', 'closed', 'notes'] },
+  cexpenses: { l: 'Client expenses', firm: true, cols: ['fileNumber', 'date', 'provider', 'description', 'category', 'reference', 'currency', 'amount', 'hst', 'payStatus', 'paidDate', 'receipt', 'notes'] },
+  pncs: { l: 'PNC intake', firm: true, cols: ['name', 'phone', 'email', 'source', 'caseType', 'lossDate', 'nextAction', 'followUp'] },
+};
+function parseCSV(t) {
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ',') { row.push(f); f = ''; }
+    else if (c === '\n' || c === '\r') { if (c === '\r' && t[i + 1] === '\n') i++; row.push(f); rows.push(row); row = []; f = ''; }
+    else f += c;
+  }
+  if (f !== '' || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+function checkImportRow(target, r, seen) {
+  const lc = s => String(s || '').trim().toLowerCase();
+  const badDate = ['dob', 'lossDate', 'opened', 'closed', 'followUp', 'date', 'paidDate'].find(k => r[k] && !isDate(r[k]));
+  if (badDate) return ['Error', `${badDate} must be YYYY-MM-DD`];
+  if (target === 'contacts') {
+    if (!r.name) return ['Error', 'Name is required'];
+    if (r.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) return ['Error', 'Invalid email'];
+    if (r.email && (S.contacts.some(c => lc(c.email) === lc(r.email)) || seen.has(lc(r.email)))) return ['Duplicate', 'Email already in contacts'];
+    if (r.email) seen.add(lc(r.email));
+  } else if (target === 'clients') {
+    if (!r.name) return ['Error', 'Name is required'];
+    if (r.email && (S.clients.some(c => lc(c.email) === lc(r.email)) || seen.has(lc(r.email)))) return ['Duplicate', 'Email matches an existing client'];
+    if (S.clients.some(c => lc(c.name) === lc(r.name) && r.dob && c.dob === r.dob)) return ['Duplicate', 'Name and DOB match an existing client'];
+    if (r.email) seen.add(lc(r.email));
+  } else if (target === 'matters') {
+    if (!r.client || !r.fileNumber || !r.caseType || !r.lawyer) return ['Error', 'client, fileNumber, caseType and lawyer are required'];
+    let m = S.clients.filter(c => c.id === r.client || lc(c.email) === lc(r.client) || lc(c.name) === lc(r.client));
+    if (m.length > 1 && r.dob) m = m.filter(c => c.dob === r.dob);
+    if (!m.length) return ['Error', 'No matching client (import clients first)'];
+    if (m.length > 1) return ['Error', 'More than one client matches; use the Client ID'];
+    const law = S.counsel.filter(l => l.id === r.lawyer || lc(l.name) === lc(r.lawyer));
+    if (law.length !== 1) return ['Error', 'Lawyer not found in the lawyer directory'];
+    if (S.matters.some(x => lc(x.fileNumber) === lc(r.fileNumber)) || seen.has(lc(r.fileNumber))) return ['Duplicate', 'File number already exists'];
+    if ((r.status || 'Open') === 'Closed' && !r.closed) return ['Error', 'Closed files need a closed date'];
+    seen.add(lc(r.fileNumber));
+    r._clientId = m[0].id; r._lawyerId = law[0].id;
+  } else if (target === 'dcontacts') {
+    if (!r.name) return ['Error', 'Name is required'];
+    if (r.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(r.email)) return ['Error', 'Invalid email'];
+    const key = r._div + '|' + lc(r.email);
+    if (r.email && (S.divContacts.some(c => c.division === r._div && lc(c.email) === lc(r.email)) || seen.has(key))) return ['Duplicate', 'Email already in this division'];
+    if (r.email) seen.add(key);
+  } else if (target === 'cexpenses') {
+    const mt = S.matters.find(x => lc(x.fileNumber) === lc(r.fileNumber));
+    if (!mt) return ['Error', 'No matter with this file number (import matters first)'];
+    if (!r.date) return ['Error', 'date is required'];
+    if (!r.provider) return ['Error', 'provider is required'];
+    const amt = parseMoney(r.amount), hst = r.hst ? parseMoney(r.hst) : 0;
+    if (isNaN(amt)) return ['Error', 'amount must be a number'];
+    if (isNaN(hst)) return ['Error', 'hst must be a number'];
+    const cur = (r.currency || 'CAD').toUpperCase();
+    if (!CURS.includes(cur)) return ['Error', 'currency must be CAD or USD'];
+    const pay = r.payStatus || 'Unknown';
+    if (!['Unpaid', 'Paid', 'Reimbursed', 'Unknown'].includes(pay)) return ['Error', 'payStatus must be Unpaid, Paid, Reimbursed or Unknown'];
+    if (r.receipt && !/^https:\/\//i.test(r.receipt)) return ['Error', 'receipt must be an HTTPS link'];
+    const key = [mt.id, r.date, lc(r.provider), amt, hst, lc(r.reference), lc(r.description)].join('|');
+    if (S.expenses.some(e => e.scope === 'client' && [e.matterId, e.date, lc(e.provider), e.amount, e.hst, lc(e.ref), lc(e.description)].join('|') === key) || seen.has(key)) return ['Duplicate', 'Same expense already recorded'];
+    seen.add(key);
+    r._matterId = mt.id; r._amount = amt; r._hst = hst; r._currency = cur; r._pay = pay;
+  } else if (target === 'pncs') {
+    if (!r.name) return ['Error', 'Name is required'];
+    const key = lc(r.email) || r.phone;
+    if (key && (S.pncs.some(p => (r.email && lc(p.email) === lc(r.email)) || (r.phone && p.phone === r.phone)) || seen.has(key))) return ['Duplicate', 'Email or phone matches an existing PNC'];
+    if (key) seen.add(key);
+  }
+  return ['Ready', ''];
+}
+function pgImports() {
+  const target = UI.impTarget || 'contacts', T = IMPORT_TARGETS[target];
+  const batch = UI.impBatch && byId('batches', UI.impBatch);
+  const mine = S.batches.filter(b => b.createdBy === me().id && (!IMPORT_TARGETS[b.target].firm || hasFirm())).slice().reverse();
+  const allowed = Object.entries(IMPORT_TARGETS).filter(([, t]) => (!t.firm || hasFirm()) && (!t.div || hasDiv(t.div)));
+  return head('Import records', 'Preview, review, then commit. Existing records are never overwritten, and committing the same batch twice adds nothing.') +
+    `<div class="infobox">Load clients first, then matters, then client expenses. Limits: 100 rows, 60 columns and 300 KB per batch. Dates use YYYY-MM-DD. Imported records are saved only in this browser.</div>
+    ${isOwner() && S.clients.some(c => SAMPLE_FIRM.clients.includes(c.id)) ? `<section class="card"><h3>Example JD&amp;Co records</h3><p style="margin-top:0">The client directory, PNC tracker and client expenses start with made-up examples. Remove them before importing your real files.</p>${btn('Remove example JD&Co records', 'removeSamples', {}, 'danger')}</section>` : ''}
+    <section class="card"><h3>1. Choose a target and add CSV</h3>
+    <div class="toolbar"><select data-ui="impTarget" aria-label="Import target">${allowed.map(([k, t]) => `<option value="${k}"${k === target ? ' selected' : ''}>${esc(t.l)}${t.firm ? ' (firm)' : ''}</option>`).join('')}</select>
+    ${target === 'contacts' ? `<select id="impBrand" aria-label="Brand">${BRANDS.map(b => `<option>${esc(b)}</option>`).join('')}</select>` : ''}
+    ${target === 'dcontacts' ? `<select id="impDiv" aria-label="Division">${myDivisions().filter(d => d.id !== 'marketing').map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('')}</select>` : ''}
+    ${['contacts', 'dcontacts'].includes(target) ? `<select id="impOwner" aria-label="Staff owner">${activeMembers().map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select>` : ''}
+    ${btn('Download template', 'impTemplate', { target }, 'sm ghost')}</div>
+    <div class="field"><label for="impText">CSV with a header row: <code>${T.cols.join(',')}</code></label><textarea id="impText" rows="7" style="font-family:ui-monospace,Consolas,monospace;font-size:12.5px">${esc(UI.impText || '')}</textarea></div>
+    <div class="toolbar" style="margin:12px 0 0"><label class="btn sm" style="cursor:pointer">Choose CSV file<input type="file" accept=".csv,text/csv" id="impFile" class="sr"></label>${btn('Preview', 'impPreview', { target }, 'primary')}</div></section>
+    ${batch ? `<section class="card"><h3>2. Review batch ${pill(IMPORT_TARGETS[batch.target].l)}</h3>
+      ${batch.ignored?.length ? `<p class="note" style="margin-top:0">Ignored columns: ${batch.ignored.map(esc).join(', ')}</p>` : ''}
+      ${table('tbl-batch', [
+        { l: 'Use', v: r => r.status === 'Ready' && !batch.committed ? `<input type="checkbox" class="impSel" value="${r.rowId}" checked aria-label="Select row ${r.n}">` : '' },
+        { l: 'Row', num: true, v: r => r.n }, { l: 'Status', v: r => sp(r.status) },
+        { l: 'Data', v: r => esc(Object.entries(r.data).filter(([k, v]) => v && !k.startsWith('_')).map(([k, v]) => `${k}: ${v}`).join(' · ')) }, { l: 'Message', v: r => esc(r.msg || '') },
+      ], batch.rows)}
+      <div class="toolbar" style="margin:12px 0 0">${batch.committed ? `<span class="muted">Committed ${fmtDT(batch.committedAt)}: ${batch.rows.filter(r => r.status === 'Committed').length} records added.</span>${btn('Commit again', 'impCommit', { id: batch.id }, 'sm ghost')}` : btn('Commit selected rows', 'impCommit', { id: batch.id }, 'accent')}</div></section>` : ''}
+    <section class="card"><h3>Your batches</h3>${table('tbl-batches', [
+      { l: 'Batch', v: b => `<code>${esc(b.id.slice(0, 8))}</code>` }, { l: 'Target', v: b => esc(IMPORT_TARGETS[b.target].l) }, { l: 'Created', v: b => fmtDT(b.createdAt) },
+      { l: 'Rows', num: true, v: b => b.rows.length }, { l: 'Status', v: b => b.committed ? sp('Committed') : pill('Preview') },
+      { l: '', v: b => `<div class="acts-cell">${btn('Open', 'setui', { k: 'impBatch', v: b.id }, 'sm')}</div>` },
+    ], mine, { empty: 'No batches yet.' })}<p class="note">Batches are private to the person who created them.</p></section>`;
+}
+// The made-up JD&Co records from the original sample data.
+const SAMPLE_FIRM = { clients: ['cl1', 'cl2', 'cl3'], matters: ['mt1', 'mt2', 'mt3', 'mt4'], pncs: ['pn1', 'pn2', 'pn3'], expenses: ['e5', 'e6'] };
+ACT.removeSamples = () => confirmModal('Remove example JD&Co records?', 'This removes the 3 made-up clients, their 4 matters and checklists, the 3 made-up PNCs with their contact attempts, and the 2 made-up client expenses. Your own records are not touched.', 'Remove examples', () => {
+  S.clients = S.clients.filter(c => !SAMPLE_FIRM.clients.includes(c.id));
+  S.matters = S.matters.filter(m => !SAMPLE_FIRM.matters.includes(m.id));
+  S.checklist = S.checklist.filter(x => !SAMPLE_FIRM.matters.includes(x.matterId));
+  S.pncs = S.pncs.filter(p => !SAMPLE_FIRM.pncs.includes(p.id));
+  S.attempts = S.attempts.filter(a => !SAMPLE_FIRM.pncs.includes(a.pncId));
+  S.expenses = S.expenses.filter(e => !SAMPLE_FIRM.expenses.includes(e.id));
+  log('Removed example JD&Co records', 'Sample data', 'firm');
+});
+ACT.impTemplate = d => download(`momentum-${d.target}-template.csv`, IMPORT_TARGETS[d.target].cols.join(',') + '\r\n', 'text/csv');
+ACT.impPreview = d => {
+  const text = $('#impText').value; UI.impText = text;
+  const T = IMPORT_TARGETS[d.target];
+  if (T.firm && !hasFirm()) return alertBox('Firm imports need JD&Co Law Firm access.');
+  const divSel = $('#impDiv')?.value;
+  if (d.target === 'dcontacts' && (!divSel || !hasDiv(divSel))) return alertBox('Choose a division you have access to.');
+  if (new Blob([text]).size > 300 * 1024) return alertBox('This batch is larger than 300 KB. Split it into smaller files.');
+  const rows = parseCSV(text);
+  if (rows.length < 2) return alertBox('Add a header row and at least one data row.');
+  const hdr = rows[0].map(h => h.trim());
+  if (hdr.length > 60) return alertBox('Too many columns. The limit is 60.');
+  if (rows.length - 1 > 100) return alertBox('Too many rows. The limit is 100 per batch.');
+  const map = hdr.map(h => T.cols.find(c => c.toLowerCase() === h.toLowerCase().replace(/[\s_]/g, '')) || null);
+  const seen = new Set();
+  const out = rows.slice(1).map((r, i) => {
+    const data = {}; map.forEach((k, j) => { if (k) data[k] = (r[j] || '').trim(); });
+    if (d.target === 'dcontacts') data._div = divSel;
+    const [status, msg] = checkImportRow(d.target, data, seen);
+    return { rowId: uid(), n: i + 2, data, status, msg };
+  });
+  const b = { id: uid(), target: d.target, createdBy: me().id, createdAt: nowISO(), rows: out, committed: false, ignored: hdr.filter((h, j) => !map[j]), brand: $('#impBrand')?.value, ownerId: $('#impOwner')?.value };
+  S.batches.push(b); UI.impBatch = b.id; save(); render();
+};
+ACT.impCommit = d => {
+  const b = byId('batches', d.id);
+  if (b.committed) return alertBox('This batch was already committed, so nothing was added again.');
+  if (b.createdBy !== me().id) return alertBox('Only the person who created a batch can commit it.');
+  const sel = new Set([...document.querySelectorAll('.impSel:checked')].map(x => x.value));
+  if (!sel.size) return alertBox('Select at least one Ready row.');
+  if (b.target === 'contacts' && !byId('members', b.ownerId)?.active) return alertBox('The relationship owner is no longer active.');
+  const seen = new Set(); let added = 0;
+  b.rows.forEach(r => {
+    if (r.status !== 'Ready') return;
+    if (!sel.has(r.rowId)) { r.status = 'Skipped'; return; }
+    const [st, msg] = checkImportRow(b.target, r.data, seen);
+    if (st !== 'Ready') { r.status = st; r.msg = msg + ' (rechecked at commit)'; return; }
+    const x = r.data;
+    if (b.target === 'contacts') { const co = x.company && S.companies.find(c => c.name.toLowerCase() === x.company.toLowerCase()); upsert('contacts', { name: x.name, email: x.email, phone: x.phone, companyId: co?.id || '', role: x.role, source: x.source || 'Import', notes: x.notes, brands: [b.brand], ownerId: b.ownerId, emailPref: 'Unknown', status: 'Active', importBatch: b.id }); }
+    if (b.target === 'clients') upsert('clients', { name: x.name, email: x.email, phone: x.phone, dob: x.dob, address: x.address, instructions: x.instructions, importBatch: b.id });
+    if (b.target === 'matters') upsert('matters', { clientId: x._clientId, fileNumber: x.fileNumber, caseType: x.caseType, lawyerId: x._lawyerId, lossDate: x.lossDate, status: x.status || 'Open', opened: x.opened, closed: x.closed, notes: x.notes, importBatch: b.id });
+    if (b.target === 'cexpenses') upsert('expenses', { scope: 'client', matterId: x._matterId, date: x.date, provider: x.provider, description: x.description, category: x.category, ref: x.reference, currency: x._currency, amount: x._amount, hst: x._hst, payStatus: x._pay, paidDate: x.paidDate, receipt: x.receipt, notes: x.notes, bookStatus: 'Not submitted', state: 'Recorded', importBatch: b.id });
+    if (b.target === 'dcontacts') upsert('divContacts', { division: x._div, name: x.name, email: x.email, phone: x.phone, organization: x.organization, role: x.role, notes: x.notes, ownerId: b.ownerId, status: 'Active', importBatch: b.id });
+    if (b.target === 'pncs') upsert('pncs', { name: x.name, phone: x.phone, email: x.email, source: x.source, caseType: x.caseType, lossDate: x.lossDate, nextAction: x.nextAction, followUp: x.followUp, status: 'New', urgency: 'Normal', importBatch: b.id });
+    r.status = 'Committed'; added++;
+  });
+  b.committed = true; b.committedAt = nowISO();
+  log('Committed import batch', `${IMPORT_TARGETS[b.target].l}: ${added} records`, IMPORT_TARGETS[b.target].firm ? 'firm' : 'general');
+  save(); render(); toast(`${added} record${added === 1 ? '' : 's'} imported.`);
+};
+
+/* ---------- Division contact directories ---------- */
+const divMemberOpts = divId => () => activeMembers().filter(m => hasDiv(divId, m)).map(m => [m.id, m.name]);
+function pgDivContacts(divId) {
+  const d = DIV[divId], t = today();
+  const rows = S.divContacts.filter(c => c.division === divId && (UI.dcArchived || c.status !== 'Archived')).sort((a, b) => a.name.localeCompare(b.name));
+  const sub = divId === 'jdco' ? 'People the firm works with, such as doctors, adjusters and other lawyers. Clients have their own directory.' : `Contacts for ${esc(d.name)}. Only staff with access to this division can see them.`;
+  return head(`${d.name} contacts`, sub, btn('Add contact', 'editDivContact', { div: divId }, 'primary')) +
+    `<div class="toolbar">${searchBox('tbl-dc-' + divId, 'Search name, email, organization')}<label class="chk"><input type="checkbox" data-ui="dcArchived"${UI.dcArchived ? ' checked' : ''}> Show archived</label></div>` +
+    table('tbl-dc-' + divId, [
+      { l: 'Name', v: c => `<strong>${esc(c.name)}</strong><div class="muted">${esc(c.email || '')}</div>` },
+      { l: 'Organization', v: c => esc(c.organization || '—') + (c.role ? `<div class="muted">${esc(c.role)}</div>` : '') },
+      { l: 'Phone', v: c => esc(c.phone || '—') }, { l: 'Owner', v: c => memberName(c.ownerId) },
+      { l: 'Next action', v: c => c.nextAction ? `${esc(c.nextAction)}<div class="muted"${c.followUp && c.followUp < t ? ' style="color:var(--bad)"' : ''}>${fmtDate(c.followUp)}</div>` : '—' },
+      { l: 'Status', v: c => sp(c.status) },
+      { l: '', v: c => `<div class="acts-cell">${editBtn('editDivContact', c.id)}</div>` },
+    ], rows, { empty: `No ${d.name} contacts yet. Select Add contact to create the first one.` });
+}
+ACT.editDivContact = d => {
+  const prev = d.id ? byId('divContacts', d.id) : null, divId = prev?.division || d.div;
+  if (!hasDiv(divId)) return alertBox('You don’t have access to this division.');
+  formModal(prev ? 'Edit contact' : `Add ${DIV[divId].name} contact`, [
+    { k: 'name', l: 'Name', req: true }, { k: 'organization', l: 'Organization' },
+    { k: 'role', l: 'Role or title' }, { k: 'email', l: 'Email', t: 'email' }, { k: 'phone', l: 'Phone', t: 'tel' },
+    { k: 'ownerId', l: 'Staff owner', t: 'select', req: true, o: divMemberOpts(divId) },
+    { k: 'nextAction', l: 'Next action' }, { k: 'followUp', l: 'Follow-up date', t: 'date' },
+    { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Active', 'Archived'] },
+    { k: 'notes', l: 'Notes', t: 'textarea' },
+  ], prev || { ownerId: me().id, status: 'Active' }, (v, form) => {
+    const changed = v.email && v.email.toLowerCase() !== (prev?.email || '').toLowerCase();
+    const dup = changed && S.divContacts.find(c => c.id !== prev?.id && c.division === divId && (c.email || '').toLowerCase() === v.email.toLowerCase());
+    if (dup && form.dataset.dupOk !== v.email.toLowerCase()) { form.dataset.dupOk = v.email.toLowerCase(); return `${dup.name} already uses ${v.email} in this division. Select Save again if that’s intentional.`; }
+    upsert('divContacts', { ...v, division: divId, id: prev?.id });
+    log(prev ? 'Updated contact' : 'Added contact', `${DIV[divId].name}: ${v.name}`, divId === 'jdco' ? 'firm' : 'general');
+  });
+};
+
+/* ---------- Document folders ---------- */
+const FOLDER_KINDS = ['Document', 'Template', 'Policy', 'Form', 'Manuscript', 'Image', 'Link', 'Note'];
+const canSeeFolder = f => !!f && (!f.div || hasDiv(f.div));
+function pgFolder(fid) {
+  const f = FOLDER[fid];
+  if (!f) return head('Folder not found');
+  const rows = S.folderItems.filter(x => x.folder === fid).sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  return head(f.name, `${esc(f.area)} · ${esc(f.about)}`, btn('Add item', 'editFolderItem', { folder: fid }, 'primary')) +
+    `<div class="infobox">Files stay in Box. Add each item with its Box link so the team can open it from here.</div>
+    <div class="toolbar">${searchBox('tbl-f-' + fid, 'Search ' + f.name)}</div>` +
+    table('tbl-f-' + fid, [
+      { l: 'Item', v: x => `<strong>${esc(x.title)}</strong>${x.notes ? `<div class="muted">${esc(x.notes)}</div>` : ''}` },
+      { l: 'Type', v: x => pill(x.kind) }, { l: 'Status', v: x => sp(x.status) },
+      { l: 'Owner', v: x => memberName(x.ownerId) }, { l: 'Updated', v: x => fmtDT(x.updatedAt || x.createdAt) },
+      { l: 'Link', v: x => x.link ? ext(x.link, 'Open in Box') : '<span class="muted">No link yet</span>' },
+      { l: '', v: x => `<div class="acts-cell">${editBtn('editFolderItem', x.id)}</div>` },
+    ], rows, { empty: `Nothing in ${f.name} yet. Select Add item to add the first one.` });
+}
+ACT.editFolderItem = d => {
+  const prev = d.id ? byId('folderItems', d.id) : null, fid = prev?.folder || d.folder, f = FOLDER[fid];
+  if (!canSeeFolder(f)) return alertBox('You don’t have access to this folder.');
+  formModal(prev ? 'Edit item' : `Add to ${f.name}`, [
+    { k: 'title', l: 'Title', req: true, full: true },
+    { k: 'kind', l: 'Type', t: 'select', blank: false, o: FOLDER_KINDS },
+    { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Draft', 'In review', 'Final'] },
+    { k: 'link', l: 'Box link', t: 'url', full: true, help: 'Paste the HTTPS link from Box.' },
+    { k: 'ownerId', l: 'Owner', t: 'select', req: true, o: f.div ? divMemberOpts(f.div) : memberOpts() },
+    { k: 'notes', l: 'Notes', t: 'textarea' },
+  ], prev || { kind: 'Document', status: 'Draft', ownerId: me().id }, v => {
+    upsert('folderItems', { ...v, folder: fid, id: prev?.id });
+    log(prev ? 'Updated item' : 'Added item', `${f.name}: ${v.title}`);
+  }, { size: 'narrow' });
+};
+
+/* ---------- People and access ---------- */
+const divPills = x => x.role === 'Owner' ? pill('All divisions', 'info') : (x.divisions || []).length ? `<div class="tags">${DIVISIONS.filter(d => x.divisions.includes(d.id)).map(d => pill(d.name, d.id === 'jdco' ? 'info' : '')).join('')}</div>` : '<span class="muted">None yet</span>';
+function canManage(x) { const m = me(); if (x.role === 'Owner') return false; if (isOwner(m)) return true; return m.role === 'Administrator' && x.role === 'Member'; }
+function pgPeople() {
+  const m = me();
+  return head('People and access', 'Momentum membership. Hosting access is a separate control, and adding someone here doesn’t send an invitation.', btn('Add staff member', 'editMember', {}, 'primary')) +
+    `<div class="infobox">Add each person with the exact email they sign in with. Their membership binds on first sign-in. Give each person the divisions they work on; they only see those divisions. Only Jasmine can grant the restricted divisions (JD&amp;Co Law Firm, Accounting and JD Publishing) or manage administrators.</div>` +
+    table('tbl-ppl', [
+      { l: 'Name', v: x => `<strong>${esc(x.name)}</strong>${x.id === m.id ? ' <span class="muted">(you)</span>' : ''}<div class="muted">${esc(x.email || 'Sign-in email not added')}</div>` },
+      { l: 'Title', v: x => x.title ? esc(x.title) : '<span class="muted">Not added yet</span>' },
+      { l: 'Role', v: x => sp(x.role) }, { l: 'Divisions', v: divPills },
+      { l: 'Sign-in', v: x => x.bound ? pill('Bound', 'ok') : pill('Pending first sign-in', 'warn') },
+      { l: 'Status', v: x => x.active ? sp('Active') : pill('Deactivated', 'bad') },
+      { l: '', v: x => canManage(x) ? `<div class="acts-cell">${editBtn('editMember', x.id)}</div>` : '' },
+    ], S.members) +
+    `<section class="card" style="margin-top:16px"><h3>Audit log ${btn('Reset demo data', 'reset', {}, 'sm danger')}</h3>${auditList(25)}</section>`;
+}
+ACT.editMember = d => {
+  const prev = d.id ? byId('members', d.id) : null, owner = isOwner();
+  const fields = [
+    { k: 'name', l: 'Name', req: true }, { k: 'title', l: 'Title' },
+    { k: 'email', l: 'Sign-in email', t: 'email', full: true, help: 'Needed before this person can sign in to the real app.' },
+    { k: 'role', l: 'Role', t: 'select', blank: false, o: owner ? ['Member', 'Administrator'] : ['Member'] },
+    { k: 'divisions', l: 'Division access', t: 'multi', def: [], o: DIVISIONS.filter(x => owner || !RESTRICTED.includes(x.id)).map(x => [x.id, x.name + (RESTRICTED.includes(x.id) ? ' (restricted)' : '')]), help: owner ? 'Restricted divisions hold sensitive records. Only you can grant them.' : 'Only Jasmine can grant JD&Co Law Firm, Accounting or JD Publishing.' },
+    { k: 'active', l: 'Active', t: 'check', cl: 'Can use Momentum', def: true },
+  ];
+  formModal(prev ? 'Edit ' + prev.name : 'Add staff member', fields, prev, v => {
+    if (v.email && S.members.some(x => x.id !== prev?.id && (x.email || '').toLowerCase() === v.email.toLowerCase())) return 'That email already belongs to a member.';
+    if (prev && prev.id === me().id && !v.active) return 'You can’t deactivate yourself.';
+    if (prev && prev.bound && prev.email && prev.email.toLowerCase() !== v.email.toLowerCase()) return 'This person has already signed in, so their email is bound and can’t be changed here.';
+    const keepRestricted = (prev?.divisions || []).filter(x => RESTRICTED.includes(x));
+    const divisions = owner ? v.divisions : [...keepRestricted, ...v.divisions.filter(x => !RESTRICTED.includes(x))];
+    const r = upsert('members', { ...v, divisions, id: prev?.id, bound: prev?.bound || false });
+    log(prev ? 'Updated member' : 'Added member', r.name);
+  }, { size: 'narrow' });
+};
+ACT.myProfile = () => {
+  const m = me();
+  formModal('My profile', [
+    { k: 'title', l: 'Your title', req: true, full: true, help: 'For example Marketing Coordinator or Law Clerk.' },
+  ], m, v => { m.title = v.title; m.rev = (m.rev || 1) + 1; log('Updated title', m.name + ': ' + v.title); }, { size: 'narrow', intro: `<p style="margin-top:0"><strong>${esc(m.name)}</strong> · ${esc(m.role)}</p>` });
+};
+ACT.reset = () => confirmModal('Reset demo data?', 'This replaces everything in this browser with the original sample data.', 'Reset', () => { const who = S.session; S = seed(); S.session = who; });
+
+/* ---------- misc UI ---------- */
+function toast(text) {
+  const t = document.createElement('div');
+  t.setAttribute('role', 'status');
+  t.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:10px;z-index:50;max-width:calc(100vw - 32px);font-size:13.5px;box-shadow:0 10px 30px rgba(0,0,0,.2)';
+  t.textContent = text; document.body.append(t); setTimeout(() => t.remove(), 3200);
+}
+function alertBox(text) { modal('Can’t do that yet', `<p style="margin:0">${esc(text)}</p>`, { size: 'narrow' }); }
+
+/* ---------- login ---------- */
+function loginHtml(msg) {
+  return `<div class="login"><main class="login-card">
+    <img class="login-hero" src="img/staircase.jpg" alt="">
+    <h1 class="wordmark">MOMENTUM</h1><div class="byline">By Jasmine Daya, Law Girl</div><div class="tagline">Bold ambition creates limitless possibility</div>
+    <div class="qcard"><div class="lbl">Today’s inspiration · ${fmtDate(today())}</div><blockquote id="q-login">${esc(quoteToday())}</blockquote></div>
+    ${msg ? `<div class="warnbox" role="alert">${esc(msg)}</div>` : ''}
+    <div class="who" role="group" aria-label="Choose a demo identity">${S.members.map(p => `<button type="button" data-act="login" data-id="${p.id}"><span><strong>${esc(p.name)}</strong><br><small>${esc(p.title || 'Title not added yet')}</small></span><span class="tags">${sp(p.role)}${p.role === 'Owner' ? pill('All divisions', 'info') : pill(`${(p.divisions || []).length} division${(p.divisions || []).length === 1 ? '' : 's'}`, 'info')}${p.active ? '' : pill('Deactivated', 'bad')}</span></button>`).join('')}</div>
+    <p class="proto">Prototype: choose who to sign in as. The real app uses individual ChatGPT sign-in. All sample data is fictional and saved only in this browser.</p>
+    <p class="proto"><strong>Version 8 · Client import</strong></p>
+  </main></div>`;
+}
+ACT.login = d => {
+  const m = byId('members', d.id);
+  if (!m.active) { app.innerHTML = loginHtml(`${m.name}’s membership is deactivated, so access is denied.`); return; }
+  S.session = m.id;
+  if (!m.bound) { m.bound = true; log('First sign-in bound membership', m.name); }
+  save();
+  if (location.hash && location.hash !== '#/overview') location.hash = '#/overview'; else render();
+};
+ACT.logout = () => { S.session = null; save(); history.replaceState(null, '', location.pathname); render(); };
+ACT.menu = () => { $('.side')?.classList.toggle('open'); $('.scrim')?.classList.toggle('on'); };
+
+/* ---------- render ---------- */
+const app = document.getElementById('app');
+function route() { const h = location.hash.replace(/^#\/?/, ''); const [r, id] = h.split('/'); return { r: r || 'overview', id: id && decodeURIComponent(id) }; }
+function render() {
+  const m = me();
+  if (!m) { app.innerHTML = loginHtml(); document.title = 'Momentum'; return; }
+  const { r, id } = route();
+  const key = PAGES[r] ? r : 'overview', page = PAGES[key];
+  const needDiv = page.divFromId ? id : page.folderFromId ? FOLDER[id]?.div : page.div;
+  const denied = (needDiv && (!DIV[needDiv] || !hasDiv(needDiv, m))) || (page.admin && !isAdmin(m));
+  const body = denied
+    ? head('Access denied') + `<section class="card"><p style="margin:0">${page.admin ? 'This area is for administrators.' : `This area needs access to ${esc(DIV[needDiv]?.name || 'this division')}. Jasmine grants division access in People and access.`} Each request is checked, even when someone types the address directly.</p></section>`
+    : page.f(id);
+  const active = ['dcontacts', 'folder'].includes(key) ? key + '/' + id : (page.nav || key);
+  // Brand imagery from the Box "Images" folder, shown as a banner on matching pages.
+  const HERO = { overview: 'city', calendar: 'calendar', contacts: 'loops', companies: 'loops', opps: 'loops', followups: 'loops',
+    mprograms: 'office', oprograms: 'office', mexpenses: 'marketing-expenses', cexpenses: 'client-expenses', clients: 'client-archive', dcontacts: 'loops' };
+  const heroKey = HERO[active] || HERO[key] || (key === 'folder' && FOLDER[id]?.hero);
+  const hero = !denied && heroKey ? `<img class="hero-img" src="img/${heroKey}.jpg" alt="">` : '';
+  const alertN = alerts().filter(a => a.state !== 'read').length;
+  const nav = NAV.filter(g => (!g.div || hasDiv(g.div, m)) && (!g.admin || isAdmin(m))).map(g => `<div class="navg"><h4>${esc(g.g)}${RESTRICTED.includes(g.div) ? ' <span class="lock">Restricted</span>' : ''}</h4>${g.items.map(([k, l]) => k === '__h' ? `<div class="navsub">${esc(l)}</div>` : `<a href="#/${k}" class="${k === active ? 'on' : ''}"${k === active ? ' aria-current="page"' : ''}><span>${esc(l)}</span>${k === 'attention' && alertN ? `<span class="count" aria-label="${alertN} alerts">${alertN}</span>` : ''}</a>`).join('')}</div>`).join('');
+  const scrollY = window.scrollY;
+  app.innerHTML = `<div class="mbar"><button type="button" class="icon-btn" data-act="menu" aria-label="Open menu">☰</button><span class="wordmark">MOMENTUM</span><a href="#/attention" class="btn sm ghost" aria-label="Alerts">${alertN ? `<span class="count">${alertN}</span>` : 'Alerts'}</a></div>
+  <div class="shell"><nav class="side" aria-label="Main"><div class="brand"><div class="wordmark">MOMENTUM</div><div class="byline">By Jasmine Daya, Law Girl</div></div>${nav}
+    <div class="side-foot"><div class="me">${esc(m.name)}</div><div class="muted" style="font-size:12px">${esc(m.title || m.role)}</div><div class="row">${btn(m.title ? 'My profile' : 'Add my title', 'myProfile', {}, m.title ? 'sm' : 'sm accent')}${btn('Switch user', 'logout', {}, 'sm')}</div></div></nav>
+    <div class="scrim" data-act="menu"></div>
+    <main id="main"><div class="banner">Prototype with fictional sample data, saved only in this browser. No real sign-in or server. <strong>Version 8 · Client import</strong></div>${hero}${body}</main></div>`;
+  document.querySelectorAll('[data-filter]').forEach(el => { if (el.value) applyFilter(el); });
+  document.title = (document.querySelector('.ph h1')?.textContent || 'Overview') + ' · Momentum';
+  window.scrollTo(0, UI._lastRoute === location.hash ? scrollY : 0);
+  UI._lastRoute = location.hash;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  if (el.closest('dialog') && el.dataset.act !== 'copy') return;
+  e.preventDefault();
+  const fn = ACT[el.dataset.act]; if (fn) fn({ ...el.dataset }, el);
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.closest('dialog')) return;
+  if (el.id === 'impFile' && el.files[0]) { const f = el.files[0]; if (f.size > 300 * 1024) return alertBox('This file is larger than 300 KB.'); f.text().then(t => { UI.impText = t; render(); }); return; }
+  if (el.id === 'impText') { UI.impText = el.value; return; }
+  const k = el.dataset?.ui; if (!k) return;
+  const v = el.type === 'checkbox' ? el.checked : el.value;
+  if (k.includes('.')) { const [a, b] = k.split('.'); UI[a] = { ...(UI[a] || {}), [b]: v }; } else UI[k] = v;
+  if (k === 'impTarget') UI.impBatch = null;
+  render();
+});
+document.addEventListener('input', e => { if (e.target.dataset?.filter) applyFilter(e.target); });
+window.addEventListener('hashchange', () => { $('.side')?.classList.remove('open'); render(); });
+// Quote check every 30 s; attention centre refresh every minute (skipped while a dialog is open).
+setInterval(() => { const q = quoteToday(); ['q-login', 'q-today'].forEach(id => { const el = document.getElementById(id); if (el && el.textContent !== q) el.textContent = q; }); }, 30000);
+setInterval(() => { if (me() && route().r === 'attention' && !document.querySelector('dialog[open]')) render(); }, 60000);
+
+S = load();
+if (!S || !S.members) S = seed();
+// One-time update for browsers that already opened the page: firm access for Jannelle, Mike and Nerissa (keeps titles people entered).
+if (!S.firmRosterV3) {
+  ['m5', 'm8'].forEach(id => { const m = byId('members', id); if (m) m.firm = true; });
+  if (!byId('members', 'm12')) S.members.splice(8, 0, { id: 'm12', name: 'Nerissa Sison', title: '', email: '', role: 'Member', firm: true, active: true, bound: false, rev: 1 });
+  S.firmRosterV3 = true; save();
+}
+{ const n = byId('members', 'm12'); if (n && n.name === 'Nerissa') { n.name = 'Nerissa Sison'; save(); } }
+// One-time update to divisions: everyone keeps Marketing, earlier firm access becomes JD&Co Law Firm, Jasmine gets all.
+if (!S.divisionsV4) {
+  S.members.forEach(m => { if (!m.divisions) m.divisions = m.role === 'Owner' ? DIVISIONS.map(d => d.id) : ['marketing', ...(m.firm ? ['jdco'] : [])]; delete m.firm; });
+  if (!S.divContacts) S.divContacts = seedDivContacts();
+  S.divisionsV4 = true; save();
+}
+// One-time update: Accounting only for Jannelle, JD Publishing only for Cristian (Jasmine sees all), plus Office and Publishing folders.
+if (!S.foldersV5) {
+  const only = { accounting: 'm5', publishing: 'm4' };
+  S.members.forEach(m => {
+    if (m.role === 'Owner') return;
+    m.divisions = (m.divisions || []).filter(x => !only[x] || only[x] === m.id);
+    Object.entries(only).forEach(([d, id]) => { if (m.id === id && !m.divisions.includes(d)) m.divisions.push(d); });
+  });
+  if (!S.folderItems) S.folderItems = seedFolderItems();
+  S.foldersV5 = true; save();
+}
+render();
+</script>
