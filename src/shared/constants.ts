@@ -9,13 +9,14 @@ export const DIVISIONS = [
   { id: 'publishing', name: 'JD Publishing' },
   { id: 'kitchen', name: 'JD in the Kitchen' },
   { id: 'accounting', name: 'Accounting' },
+  { id: 'properties', name: 'Properties' },
 ] as const;
 export type DivisionId = (typeof DIVISIONS)[number]['id'];
 export const DIVISION_IDS = DIVISIONS.map(d => d.id) as readonly DivisionId[];
 export const divisionName = (id: string) => DIVISIONS.find(d => d.id === id)?.name ?? id;
 
 /** Divisions only the Owner can grant. */
-export const RESTRICTED: readonly DivisionId[] = ['jdco', 'accounting', 'publishing'];
+export const RESTRICTED: readonly DivisionId[] = ['jdco', 'accounting', 'publishing', 'properties'];
 
 export const ROLES = ['Owner', 'Administrator', 'Member'] as const;
 export type Role = (typeof ROLES)[number];

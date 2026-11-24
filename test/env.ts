@@ -18,4 +18,5 @@ export const env: Env = {
   SES_WEBHOOK_TOKEN: 'test-hook-token',
   PUBLIC_BASE_URL: 'http://localhost',
   SEND_BATCH_SIZE: '40',
+  DATA_ENCRYPTION_KEY: '00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff',
 };

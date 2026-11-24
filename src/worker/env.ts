@@ -14,6 +14,8 @@ export interface Env {
   SESSION_SECRET?: string;
   /** How long a sign-in lasts, in hours (default 12). */
   SESSION_HOURS?: string;
+  /** Secret (64 hex characters): encrypts stored passwords, such as service provider logins. Never change it once used. */
+  DATA_ENCRYPTION_KEY?: string;
   /** Google account that becomes the Owner on first sign-in when no Owner exists yet. */
   OWNER_EMAIL: string;
   /** Development only: who requests are treated as when no x-dev-user header is sent. */

@@ -13,6 +13,7 @@ import { firm } from './routes/firm';
 import { imports } from './routes/imports';
 import { marketing } from './routes/marketing';
 import { people } from './routes/people';
+import { properties } from './routes/properties';
 import { pncs } from './routes/pncs';
 import { reports } from './routes/reports';
 import { team } from './routes/team';
@@ -47,6 +48,7 @@ app.route('/api', team);
 app.route('/api/reports', reports);
 app.route('/api', attention);
 app.route('/api/email', email);
+app.route('/api/properties', properties);
 
 app.notFound(c => (c.req.path.startsWith('/api/') ? c.json({ error: 'Not found.' }, 404) : c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : c.text('Not found.', 404)));
 

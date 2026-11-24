@@ -30,7 +30,9 @@ export function Overview() {
           <section className="card"><h3>Your divisions</h3>
             {DIVISIONS.some(d => hasDiv(me, d.id)) ? (
               <div className="tiles" style={{ margin: 0 }}>
-                {DIVISIONS.filter(d => hasDiv(me, d.id)).map(d => (
+                {DIVISIONS.filter(d => hasDiv(me, d.id)).map(d => d.id === 'properties' ? (
+                  <a key={d.id} className="tile" href={href('properties')}><div className="k">{d.name}</div><div className="v small">View properties</div></a>
+                ) : (
                   <a key={d.id} className="tile" href={href(`contacts/${d.id}`)}><div className="k">{d.name}</div><div className="v small">{s.contacts[d.id] ?? 0} contact{(s.contacts[d.id] ?? 0) === 1 ? '' : 's'}</div></a>
                 ))}
               </div>

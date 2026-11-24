@@ -124,8 +124,10 @@ export function Confirm({ title, text, label, onConfirm, onClose }: { title: str
 /* ---------------- Forms ---------------- */
 type Opt = string | [string, string];
 export type Field = {
-  k: string; l: string; t?: 'text' | 'email' | 'tel' | 'date' | 'datetime' | 'select' | 'textarea' | 'money' | 'check' | 'multi' | 'url' | 'number' | 'h';
+  k: string; l: string; t?: 'text' | 'email' | 'tel' | 'date' | 'datetime' | 'select' | 'textarea' | 'money' | 'check' | 'multi' | 'url' | 'number' | 'password' | 'h';
   o?: readonly Opt[]; req?: boolean; full?: boolean; help?: string; cl?: string; blank?: string | false; rows?: number;
+  /** Money only: an empty box gives null ("not recorded") instead of 0. */
+  nullable?: boolean;
 };
 export type Values = Record<string, any>;
 
@@ -143,14 +145,14 @@ function FieldInput({ f, v, set }: { f: Field; v: any; set: (v: any) => void }) 
   if (f.t === 'select') input = <select id={id} value={v ?? ''} onChange={e => set(e.target.value)} aria-required={f.req}>{f.blank !== false && <option value="">{f.blank || '—'}</option>}{opts.map(([val, txt]) => <option key={val} value={val}>{txt}</option>)}</select>;
   else if (f.t === 'textarea') input = <textarea id={id} rows={f.rows ?? 3} value={v ?? ''} onChange={e => set(e.target.value)} />;
   else if (f.t === 'money') input = <input id={id} inputMode="decimal" placeholder="0.00" value={v ?? ''} onChange={e => set(e.target.value)} />;
-  else input = <input id={id} type={f.t === 'datetime' ? 'datetime-local' : f.t === 'url' ? 'url' : f.t ?? 'text'} value={v ?? ''} onChange={e => set(e.target.value)} />;
+  else input = <input id={id} type={f.t === 'datetime' ? 'datetime-local' : f.t === 'url' ? 'url' : f.t ?? 'text'} value={v ?? ''} onChange={e => set(e.target.value)} autoComplete={f.t === 'password' ? 'new-password' : undefined} />;
   return <div className={`field${f.full || f.t === 'textarea' ? ' full' : ''}`}>{label}{input}{help}</div>;
 }
 
 /** Money fields are edited as "125.00" strings and handed back as integer cents. */
 function toForm(fields: Field[], initial: Values) {
   const out: Values = { ...initial };
-  for (const f of fields) if (f.t === 'money' && typeof initial[f.k] === 'number') out[f.k] = (initial[f.k] / 100).toFixed(2);
+  for (const f of fields) if (f.t === 'money') out[f.k] = typeof initial[f.k] === 'number' ? (initial[f.k] / 100).toFixed(2) : '';
   return out;
 }
 function fromForm(fields: Field[], values: Values): Values | string {
@@ -160,7 +162,7 @@ function fromForm(fields: Field[], values: Values): Values | string {
     const v = values[f.k];
     if (f.req && (v === undefined || v === null || v === '' || v === false || (Array.isArray(v) && !v.length))) return `${f.l} is required.`;
     if (f.t === 'money') {
-      if (v === undefined || v === '') out[f.k] = f.req ? NaN : 0;
+      if (v === undefined || v === null || v === '') out[f.k] = f.req ? NaN : f.nullable ? null : 0;
       else { const c = parseCents(String(v)); if (Number.isNaN(c)) return `${f.l} must be an amount, like 125.00.`; out[f.k] = c; }
     }
     if (f.t === 'url' && v && !/^https:\/\/\S+$/i.test(String(v))) return `${f.l} must be an HTTPS link.`;

@@ -44,7 +44,7 @@ export const text = (max = 2000) => z.string().trim().max(max).default('');
 export const reqText = (max = 300) => z.string().trim().min(1, 'is required').max(max);
 export const rev = z.number().int().positive();
 
-export async function audit(c: Context<AppEnv>, action: string, entity: string, scope: 'general' | 'firm' = 'general') {
+export async function audit(c: Context<AppEnv>, action: string, entity: string, scope: 'general' | 'firm' | 'properties' = 'general') {
   const m = c.get('member');
   await c.env.DB.prepare('INSERT INTO audit (id, at, actor_id, action, entity, scope) VALUES (?, ?, ?, ?, ?, ?)')
     .bind(newId(), nowIso(), m?.id ?? null, action, entity.slice(0, 300), scope).run();

@@ -23,6 +23,7 @@ import { EmailHome, EmailImport, EmailList } from './pages/Email';
 import { MailingDetail, Mailings } from './pages/Mailings';
 import { Opportunities } from './pages/Opportunities';
 import { Programs } from './pages/Programs';
+import { Properties, PropertyDetail } from './pages/Properties';
 import { TeamWorkspace } from './pages/Team';
 import { StaffUpdates } from './pages/Updates';
 
@@ -37,10 +38,11 @@ const NAV: NavGroup[] = [
     { heading: 'Planning and spend' }, { path: 'campaigns', label: 'Campaigns and results' }, { path: 'programs', label: 'Marketing programs' }, { path: 'mk-expenses', label: 'Marketing expenses' },
     { heading: 'Email' }, { path: 'email', label: 'Email lists' }, { path: 'mailings', label: 'Mailings' },
   ] },
-  ...DIVISIONS.filter(d => d.id !== 'jdco' && d.id !== 'marketing').map(d => ({
+  ...DIVISIONS.filter(d => d.id !== 'jdco' && d.id !== 'marketing' && d.id !== 'properties').map(d => ({
     title: d.name, division: d.id,
     items: [{ path: `contacts/${d.id}`, label: 'Contacts' }, ...FOLDERS.filter(f => f.division === d.id).map(f => ({ path: `folder/${f.id}`, label: f.name }))],
   })),
+  { title: 'Properties', division: 'properties', items: [{ path: 'properties', label: 'Properties' }] },
   { title: 'Administration', admin: true, items: [{ path: 'imports', label: 'Import records' }, { path: 'people', label: 'People and access' }] },
 ];
 
@@ -57,6 +59,7 @@ const MARKETING_PAGES = ['mk-contacts', 'mk-contact', 'companies', 'opportunitie
 function allowed(me: Me, p: string, id: string) {
   if (['clients', 'client', 'checklist', 'pncs', 'pnc', 'counsel', 'expenses'].includes(p)) return hasDiv(me, 'jdco');
   if (MARKETING_PAGES.includes(p)) return hasDiv(me, 'marketing');
+  if (p === 'properties' || p === 'property') return hasDiv(me, 'properties');
   if (p === 'contacts') return hasDiv(me, id);
   if (p === 'folder') { const f = FOLDERS.find(x => x.id === id); return !f?.division || hasDiv(me, f.division); }
   if (p === 'imports' || p === 'people') return isAdmin(me);
@@ -94,6 +97,8 @@ function route(me: Me, parts: string[]): { active: string; page: ReactNode } {
     case 'email-import': return { active: 'email', page: <EmailImport key={id} brand={id || undefined} /> };
     case 'mailings': return { active: 'mailings', page: <Mailings /> };
     case 'mailing': return { active: 'mailings', page: <MailingDetail key={id} id={id} /> };
+    case 'properties': return { active: 'properties', page: <Properties /> };
+    case 'property': return { active: 'properties', page: <PropertyDetail key={id} id={id} /> };
     case 'imports': return { active: 'imports', page: <Imports /> };
     case 'people': return { active: 'people', page: <People /> };
     default: return { active: 'overview', page: <Overview /> };

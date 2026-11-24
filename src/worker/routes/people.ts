@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { z } from 'zod';
 import { DIVISION_IDS } from '../../shared/constants';
 import type { AppEnv } from '../env';
-import { canGrant, canManageMember, hasFirm, isAdmin, isOwner, requireAdmin } from '../policy';
+import { canGrant, canManageMember, hasDivision, hasFirm, isAdmin, isOwner, requireAdmin } from '../policy';
 import { assertUpdated, audit, body, fail, memberFromRow, newId, nowIso, optEmail, rev, text } from '../util';
 
 export const people = new Hono<AppEnv>();
@@ -81,7 +81,9 @@ people.patch('/members/:id', async c => {
 people.get('/audit', async c => {
   const m = c.get('member');
   const limit = Math.min(Number(c.req.query('limit')) || 25, 200);
-  const { results } = await c.env.DB.prepare(`SELECT a.*, m.name AS actor_name FROM audit a LEFT JOIN members m ON m.id = a.actor_id ${hasFirm(m) ? '' : "WHERE a.scope <> 'firm'"} ORDER BY a.at DESC LIMIT ?`)
+  // Firm and property activity is shown only to people with that division.
+  const hidden = [!hasFirm(m) && "'firm'", !hasDivision(m, 'properties') && "'properties'"].filter(Boolean);
+  const { results } = await c.env.DB.prepare(`SELECT a.*, m.name AS actor_name FROM audit a LEFT JOIN members m ON m.id = a.actor_id ${hidden.length ? `WHERE a.scope NOT IN (${hidden.join(', ')})` : ''} ORDER BY a.at DESC LIMIT ?`)
     .bind(limit).all();
   return c.json({ audit: results.map(r => ({ id: r.id, at: r.at, actor: r.actor_name, action: r.action, entity: r.entity, scope: r.scope })) });
 });
