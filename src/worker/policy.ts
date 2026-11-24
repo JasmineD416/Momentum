@@ -37,8 +37,8 @@ export async function checkStaff(db: D1Database, memberId: string | null, divisi
 }
 
 /**
- * Who may change whom. Administrators manage ordinary Members only and cannot grant restricted divisions;
- * only the Owner manages administrators and restricted divisions. Nobody edits the Owner record here.
+ * Who may change whom. Administrators manage ordinary Members only and cannot grant any division (all are restricted);
+ * only the Owner manages administrators and grants division access. Nobody edits the Owner record here.
  */
 export function canManageMember(actor: Member, target: { role: string } | null) {
   if (!isAdmin(actor)) return false;

@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { DIVISIONS, FOLDERS } from '../shared/constants';
 import { api, ApiError, devUser } from './api';
 import { href, useRoute } from './router';
-import { hasDiv, isAdmin, isRestricted, SessionCtx, type Me, type MemberLite } from './session';
+import { hasDiv, isAdmin, SessionCtx, type Me, type MemberLite } from './session';
 import { FormModal, PageHead, ToastProvider, useLoad, useToast } from './ui';
 import { Overview } from './pages/Overview';
 import { Clients, ClientDetail } from './pages/Clients';
@@ -31,7 +31,7 @@ type NavItem = { path: string; label: string } | { heading: string };
 type NavGroup = { title: string; division?: string; admin?: boolean; items: NavItem[] };
 
 const NAV: NavGroup[] = [
-  { title: 'Team', items: [{ path: 'overview', label: 'Overview' }, { path: 'attention', label: 'Attention centre' }, { path: 'team', label: 'Team workspace' }, { path: 'calendar', label: 'Team calendar' }, { path: 'updates', label: 'Staff updates' }, { heading: 'Office' }, ...FOLDERS.filter(f => !f.division).map(f => ({ path: `folder/${f.id}`, label: f.name }))] },
+  { title: 'Team', items: [{ path: 'overview', label: 'Overview' }, { path: 'attention', label: 'Attention centre' }, { path: 'team', label: 'Team workspace' }, { path: 'calendar', label: 'Team calendar' }, { path: 'updates', label: 'Staff updates' }] },
   { title: 'JD&Co Law Firm', division: 'jdco', items: [{ path: 'contacts/jdco', label: 'Contacts' }, { path: 'clients', label: 'Client directory' }, { path: 'pncs', label: 'PNC tracker' }, { path: 'counsel', label: 'Lawyer directory' }, { path: 'expenses', label: 'Client expenses' }] },
   { title: 'Marketing', division: 'marketing', items: [
     { heading: 'Relationships' }, { path: 'mk-contacts', label: 'Marketing contacts' }, { path: 'companies', label: 'Company directory' }, { path: 'opportunities', label: 'Opportunities' }, { path: 'follow-ups', label: 'Follow-ups' },
@@ -122,7 +122,7 @@ function Shell({ me, members }: { me: Me; members: MemberLite[] }) {
           <div className="brand"><div className="wordmark">MOMENTUM</div><div className="byline">By Jasmine Daya, Law Girl</div></div>
           {groups.map(g => (
             <div className="navg" key={g.title}>
-              <h4>{g.title}{g.division && isRestricted(g.division) && <span className="lock">Restricted</span>}</h4>
+              <h4>{g.title}</h4>
               {g.items.map(i => 'heading' in i ? <div className="navsub" key={i.heading}>{i.heading}</div> : (
                 <a key={i.path} href={href(i.path)} className={i.path === active ? 'on' : undefined} aria-current={i.path === active ? 'page' : undefined}><span>{i.label}</span></a>
               ))}

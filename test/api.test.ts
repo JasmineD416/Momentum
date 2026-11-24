@@ -1,5 +1,6 @@
 import { env } from './env';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { DIVISION_IDS } from '../src/shared/constants';
 import { app } from '../src/worker/index';
 
 const OWNER = 'owner@example.test';
@@ -87,10 +88,10 @@ describe('division access', () => {
     expect((await get('mkt5@example.test', '/api/contacts?division=marketing')).status).toBe(200);
     expect((await get('mkt5@example.test', '/api/summary')).status).toBe(200);
   });
-  it('restricts JD Publishing folders but opens Office folders to everyone', async () => {
+  it('restricts JD Publishing and Office folders to their divisions', async () => {
     await addMember('mkt2@example.test', 'Member', ['marketing']);
     expect((await get('mkt2@example.test', '/api/folders/pl-series')).status).toBe(403);
-    expect((await get('mkt2@example.test', '/api/folders/hr')).status).toBe(200);
+    expect((await get('mkt2@example.test', '/api/folders/hr')).status).toBe(403);
     expect((await get('mkt2@example.test', '/api/contacts?division=accounting')).status).toBe(403);
   });
   it('hides firm activity from the audit log for non-firm staff', async () => {
@@ -104,21 +105,29 @@ describe('division access', () => {
 });
 
 describe('people and access rules', () => {
-  it('stops administrators granting restricted divisions or adding administrators', async () => {
+  it('stops administrators granting any division (Office included) or adding administrators', async () => {
     await addMember('admin@example.test', 'Administrator', ['marketing']);
-    expect((await post('admin@example.test', '/api/members', { name: 'A', email: 'a@example.test', role: 'Member', divisions: ['jdco'] })).status).toBe(403);
-    expect((await post('admin@example.test', '/api/members', { name: 'B', email: 'b@example.test', role: 'Member', divisions: ['accounting'] })).status).toBe(403);
+    for (const d of DIVISION_IDS) {
+      expect((await post('admin@example.test', '/api/members', { name: 'A', email: `a-${d}@example.test`, role: 'Member', divisions: [d] })).status, d).toBe(403);
+    }
     expect((await post('admin@example.test', '/api/members', { name: 'C', email: 'c@example.test', role: 'Administrator', divisions: [] })).status).toBe(403);
-    expect((await post('admin@example.test', '/api/members', { name: 'D', email: 'd@example.test', role: 'Member', divisions: ['marketing', 'lawgirl'] })).status).toBe(201);
+    expect((await post('admin@example.test', '/api/members', { name: 'D', email: 'd@example.test', role: 'Member', divisions: [] })).status).toBe(201);
   });
-  it('keeps restricted divisions an administrator can’t see or grant', async () => {
+  it('keeps the Office folders to people Jasmine gives Office access', async () => {
+    await addMember('no-office@example.test', 'Member', ['marketing']);
+    await addMember('office@example.test', 'Member', ['office']);
+    expect((await get('no-office@example.test', '/api/folders/hr')).status).toBe(403);
+    expect((await get('no-office@example.test', '/api/folders/sops')).status).toBe(403);
+    expect((await get('office@example.test', '/api/folders/hr')).status).toBe(200);
+  });
+  it('ignores division changes from administrators and keeps what Jasmine granted', async () => {
     await addMember('admin2@example.test', 'Administrator', ['marketing']);
     const id = await addMember('nerissa@example.test', 'Member', ['marketing', 'jdco']);
     const rev = (await get(OWNER, '/api/members')).data.members.find((m: Json) => m.id === id).rev;
     const r = await patch('admin2@example.test', `/api/members/${id}`, { name: 'Nerissa', email: 'nerissa@example.test', role: 'Member', divisions: ['lawgirl'], active: true, rev });
     expect(r.status).toBe(200);
     const after = (await get(OWNER, '/api/members')).data.members.find((m: Json) => m.id === id);
-    expect(after.divisions.sort()).toEqual(['jdco', 'lawgirl']);
+    expect(after.divisions.sort()).toEqual(['jdco', 'marketing']);
   });
   it('only shows emails to administrators', async () => {
     await addMember('plain@example.test', 'Member', ['marketing']);

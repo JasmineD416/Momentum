@@ -18,13 +18,13 @@ export function People() {
   return (
     <>
       <PageHead title="People and access" sub="Who can use Momentum and which divisions each person sees." actions={<button className="btn primary" onClick={() => setEditing('new')}>Add staff member</button>} />
-      <div className="infobox">Add each person with the Google account they sign in with. They sign in with Google; only people on this list (and switched on) can get in. Only Jasmine can grant the restricted divisions (JD&amp;Co Law Firm, Accounting and JD Publishing) or manage administrators.</div>
+      <div className="infobox">Add each person with the Google account they sign in with. They sign in with Google; only people on this list (and switched on) can get in. Only Jasmine can give anyone access to a division (including Office) or manage administrators. Administrators can add people, but Jasmine decides what they see.</div>
       <DataTable rows={members} rowKey={m => m.id} empty="No members."
         columns={[
           { label: 'Name', render: m => <><strong>{m.name}</strong>{m.id === me.id && <span className="muted"> (you)</span>}<div className="muted">{m.email}</div></> },
           { label: 'Title', render: m => m.title || <span className="muted">Not added yet</span> },
           { label: 'Role', render: m => <Status s={m.role} /> },
-          { label: 'Divisions', render: m => m.role === 'Owner' ? <Pill cls="info">All divisions</Pill> : m.divisions.length ? <div className="tags">{DIVISIONS.filter(d => m.divisions.includes(d.id)).map(d => <Pill key={d.id} cls={isRestricted(d.id) ? 'info' : ''}>{d.name}</Pill>)}</div> : <span className="muted">None yet</span> },
+          { label: 'Divisions', render: m => m.role === 'Owner' ? <Pill cls="info">All divisions</Pill> : m.divisions.length ? <div className="tags">{DIVISIONS.filter(d => m.divisions.includes(d.id)).map(d => <Pill key={d.id}>{d.name}</Pill>)}</div> : <span className="muted">None yet</span> },
           { label: 'Signed in', render: m => m.firstSignIn ? <Pill cls="ok">Yes</Pill> : <Pill cls="warn">Not yet</Pill> },
           { label: 'Status', render: m => m.active ? <Status s="Active" /> : <Pill cls="bad">Access off</Pill> },
           { label: '', render: m => canManage(m) ? <div className="acts-cell"><button className="btn sm" onClick={() => setEditing(m)}>Edit</button></div> : null },
@@ -38,8 +38,8 @@ export function People() {
           { k: 'name', l: 'Name', req: true }, { k: 'title', l: 'Title' },
           { k: 'email', l: 'Google sign-in email', t: 'email', req: true, full: true, help: 'Must match the Google account exactly.' },
           { k: 'role', l: 'Role', t: 'select', blank: false, o: owner ? ['Member', 'Administrator'] : ['Member'] },
-          { k: 'divisions', l: 'Division access', t: 'multi', o: DIVISIONS.filter(d => owner || !isRestricted(d.id)).map(d => [d.id, divisionName(d.id) + (isRestricted(d.id) ? ' (restricted)' : '')] as [string, string]),
-            help: owner ? 'Restricted divisions hold sensitive records. Only you can grant them.' : 'Only Jasmine can grant JD&Co Law Firm, Accounting or JD Publishing.' },
+          { k: 'divisions', l: 'Division access', t: 'multi', o: DIVISIONS.filter(d => owner || !isRestricted(d.id)).map(d => [d.id, divisionName(d.id)] as [string, string]),
+            help: owner ? 'Tick only what this person needs. Only you can grant division access.' : 'Only Jasmine can grant division access. She’ll add it after you save; their current access stays as it is.' },
           { k: 'active', l: 'Access', t: 'check', cl: 'Can use Momentum' },
         ]}
         onSubmit={async v => {

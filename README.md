@@ -14,7 +14,8 @@ Rebuilt in October 2026 from *Momentum Complete Website Handoff* (Box › W Mome
 ## Access rules (enforced on the server, and mirrored on screen)
 
 - Roles: **Owner**, **Administrator** and **Member**. Divisions are granted per person. The Owner sees everything.
-- **Restricted divisions** (JD&Co Law Firm, Accounting, JD Publishing) can be granted only by the Owner. Administrators manage ordinary Members only.
+- **Every division is restricted:** only the Owner grants division access, including **Office** (Human Resources, SOPs & Templates) and **Properties**. Administrators can add and edit ordinary Members but can't give or remove division access.
+- **Properties** (owner-granted) holds each property's details, a tenants folder and a service providers folder. Provider passwords are encrypted with `DATA_ENCRYPTION_KEY`, never listed, and each viewing is logged. Property activity is hidden from staff without Properties access.
 - Every route checks access itself (`src/worker/policy.ts`), whether or not the menu shows it. Firm activity is hidden from the audit log for staff without JD&Co access.
 - **Marketing** pages and their API (`/api/marketing/*`, marketing expenses) need the Marketing division. Marketing programs can also be limited to JD&Co staff or to administrators.
 - **Team work** is open to every active member, but only administrators can approve or publish work, or move it back out of Approved or Published. Linking work to a campaign needs Marketing access.

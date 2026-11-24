@@ -1,6 +1,7 @@
 // Definitions shared by the server and the screens.
 
 export const DIVISIONS = [
+  { id: 'office', name: 'Office' },
   { id: 'jdco', name: 'JD&Co Law Firm' },
   { id: 'marketing', name: 'Marketing' },
   { id: 'lawgirl', name: 'Law Girl' },
@@ -15,16 +16,16 @@ export type DivisionId = (typeof DIVISIONS)[number]['id'];
 export const DIVISION_IDS = DIVISIONS.map(d => d.id) as readonly DivisionId[];
 export const divisionName = (id: string) => DIVISIONS.find(d => d.id === id)?.name ?? id;
 
-/** Divisions only the Owner can grant. */
-export const RESTRICTED: readonly DivisionId[] = ['jdco', 'accounting', 'publishing', 'properties'];
+/** Divisions only the Owner can grant: all of them. Administrators manage people but never hand out access. */
+export const RESTRICTED: readonly DivisionId[] = DIVISION_IDS;
 
 export const ROLES = ['Owner', 'Administrator', 'Member'] as const;
 export type Role = (typeof ROLES)[number];
 
-/** Document folders. A folder with no division is open to every active staff member. */
+/** Document folders, each inside a division (the Office folders need the Office division). */
 export const FOLDERS = [
-  { id: 'hr', name: 'Human Resources', area: 'Office', division: null, about: 'Policies, forms and staff documents.' },
-  { id: 'sops', name: 'SOPs & Templates', area: 'Office', division: null, about: 'Standard operating procedures and reusable templates.' },
+  { id: 'hr', name: 'Human Resources', area: 'Office', division: 'office', about: 'Policies, forms and staff documents.' },
+  { id: 'sops', name: 'SOPs & Templates', area: 'Office', division: 'office', about: 'Standard operating procedures and reusable templates.' },
   { id: 'pl-series', name: 'The Private Lenders Series', area: 'JD Publishing', division: 'publishing', about: 'Manuscripts, drafts and production files for the series.' },
   { id: 'lg-series', name: 'Law Girl Series', area: 'JD Publishing', division: 'publishing', about: 'Manuscripts, drafts and production files for the series.' },
   { id: 'cookbooks', name: 'JD in the Kitchen Cookbooks', area: 'JD Publishing', division: 'publishing', about: 'Recipes, manuscripts and photography for the cookbooks.' },
