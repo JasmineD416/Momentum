@@ -41,7 +41,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .brand .wordmark{font-size:20px}
 .brand .byline{font-size:19px;margin-top:6px;white-space:nowrap}
 .navg{margin:12px 0 4px}
-.navg h4{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:0 8px 6px;display:flex;align-items:center;gap:6px}
+.navg h4{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--violet);padding:0 8px 6px;display:flex;align-items:center;gap:6px}
 .lock{font-size:10px;letter-spacing:.04em;text-transform:none;padding:1px 6px;border-radius:99px;background:var(--infobg);color:var(--info)}
 .navg a{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-radius:8px;color:var(--ink);text-decoration:none}
 .navg a:hover{background:var(--soft)}
