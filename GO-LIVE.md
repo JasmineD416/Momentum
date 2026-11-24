@@ -1,5 +1,20 @@
 # Taking Momentum live (GitHub + Akamai)
 
+## Current setup (live since 2026-11-24)
+
+- **Address:** https://172-105-0-58.sslip.io, a free automatic address for the server. To move to `momentum.jdlawyers.ca`:
+  1. Add an `A` record pointing to `172.105.0.58`.
+  2. Change `MOMENTUM_DOMAIN` and `PUBLIC_BASE_URL` in `/opt/momentum/.env`.
+  3. Add the new `/auth/callback` address to the Google client.
+  4. Redeploy.
+- **Server:** Akamai Linode `momentum`, Toronto, `172.105.0.58`. Root can't sign in over SSH; use **LISH Console** in Cloud Manager.
+- **Deploying:** from this computer, `bash scripts/deploy.sh`. It copies the committed code to the server, which builds and restarts it. It uses the key `~/.ssh/momentum-deploy`. GitHub keeps the code and runs the tests; it doesn't deploy.
+- **Sign-in:** Google client "Momentum" in Google Cloud project `momentum-514719`, Internal (only @jdlawyers.ca). To replace its secret, run `deploy/set-google.ps1` in Windows PowerShell.
+- **Backups:** nightly Akamai Backups are on. Continuous backups (Litestream) to the Chicago bucket `jdco-momentum-backups` start once `BACKUP_ACCESS_KEY` and `BACKUP_SECRET_KEY` are filled in on the server, with `COMPOSE_PROFILES=backup` added.
+- **Email:** off until section 13 is done.
+
+The steps below are the original full guide. Steps 1–10 are done, except the DNS name (step 6) and the backup key (step 4).
+
 The code lives on **GitHub**. Each time a change reaches the `main` branch, GitHub Actions tests it, builds a server image and updates your **Akamai (Linode)** server. Staff sign in with Google, through sign-in built into Momentum.
 
 Steps marked **You** need your own accounts and passwords, so only you can do them. Everything else is a command you can run, or Claude can run for you.
