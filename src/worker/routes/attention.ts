@@ -20,7 +20,7 @@ attention.get('/attention', async c => {
   const today = due.today, soon = addDays(today, 1);
   const alerts: Alert[] = [];
 
-  const { results: work } = await db.prepare("SELECT id, title, due_date, status FROM tasks WHERE assignee_id = ? AND due_date <> '' AND due_date <= ? AND status NOT IN ('Published', 'Completed')").bind(m.id, soon).all<Record<string, string>>();
+  const { results: work } = await db.prepare("SELECT id, title, due_date, status FROM tasks WHERE id IN (SELECT task_id FROM task_assignees WHERE member_id = ?) AND due_date <> '' AND due_date <= ? AND status NOT IN ('Published', 'Completed')").bind(m.id, soon).all<Record<string, string>>();
   for (const t of work) alerts.push({ key: `task:${t.id}:${t.due_date}`, kind: t.due_date < today ? 'Overdue work' : 'Work due', title: t.title, detail: t.status, date: t.due_date, link: 'team' });
   if (isAdmin(m)) {
     const { results } = await db.prepare("SELECT id, title, due_date, updated_at FROM tasks WHERE status = 'Ready for review'").all<Record<string, string>>();

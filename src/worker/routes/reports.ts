@@ -39,8 +39,8 @@ async function counters(db: D1Database, m: Member, scope: Scope, start: string, 
   const { from, to } = periodBounds(start, end);
   const n = async (sql: string, ...args: unknown[]) => Number((await db.prepare(sql).bind(...args).first<{ n: number }>())?.n ?? 0);
   const res: Record<string, number> = {
-    workCompleted: await n('SELECT COUNT(*) AS n FROM tasks WHERE assignee_id = ? AND completed_at >= ? AND completed_at < ?', m.id, from, to),
-    workDue: await n("SELECT COUNT(*) AS n FROM tasks WHERE assignee_id = ? AND due_date BETWEEN ? AND ? AND status NOT IN ('Published', 'Completed')", m.id, start, end),
+    workCompleted: await n('SELECT COUNT(*) AS n FROM tasks WHERE id IN (SELECT task_id FROM task_assignees WHERE member_id = ?) AND completed_at >= ? AND completed_at < ?', m.id, from, to),
+    workDue: await n("SELECT COUNT(*) AS n FROM tasks WHERE id IN (SELECT task_id FROM task_assignees WHERE member_id = ?) AND due_date BETWEEN ? AND ? AND status NOT IN ('Published', 'Completed')", m.id, start, end),
   };
   if (scope === 'general' && hasDivision(m, 'marketing'))
     res.marketingActivities = await n("SELECT COUNT(*) AS n FROM mk_activities WHERE actor_id = ? AND kind = 'Activity' AND created_at >= ? AND created_at < ?", m.id, from, to);
