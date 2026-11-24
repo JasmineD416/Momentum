@@ -1,7 +1,9 @@
-# Runs on the Akamai server in /opt/momentum (copied there by the GitHub deploy workflow). Settings come from /opt/momentum/.env.
+# Runs on the Akamai server in /opt/momentum (copied there by scripts/deploy.sh). Settings come from /opt/momentum/.env.
 services:
   app:
-    image: ${MOMENTUM_IMAGE:?set MOMENTUM_IMAGE in .env}:${MOMENTUM_TAG:-latest}
+    # Built on the server from the code in /opt/momentum/src.
+    build: ./src
+    image: momentum:local
     restart: unless-stopped
     env_file: .env
     volumes:
@@ -25,13 +27,15 @@ services:
       - caddy_config:/config
 
   # Continuous backup of the database to Akamai Object Storage (every change, within about a second).
+  # Turned on by COMPOSE_PROFILES=backup in .env once the storage key is filled in.
   backup:
     image: litestream/litestream:0.3.13
     restart: unless-stopped
     command: replicate
+    profiles: [backup]
     environment:
-      LITESTREAM_ACCESS_KEY_ID: ${BACKUP_ACCESS_KEY:?set BACKUP_ACCESS_KEY in .env}
-      LITESTREAM_SECRET_ACCESS_KEY: ${BACKUP_SECRET_KEY:?set BACKUP_SECRET_KEY in .env}
+      LITESTREAM_ACCESS_KEY_ID: ${BACKUP_ACCESS_KEY:-}
+      LITESTREAM_SECRET_ACCESS_KEY: ${BACKUP_SECRET_KEY:-}
       BACKUP_BUCKET: ${BACKUP_BUCKET}
       BACKUP_ENDPOINT: ${BACKUP_ENDPOINT}
     volumes:
