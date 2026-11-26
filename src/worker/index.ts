@@ -4,7 +4,9 @@ import { requireMember, sameOriginJson } from './auth';
 import { publicEmail } from './email/public';
 import type { AppEnv } from './env';
 import { signIn } from './google';
+import { announcements } from './routes/announcements';
 import { attention } from './routes/attention';
+import { claims } from './routes/claims';
 import { campaigns } from './routes/campaigns';
 import { directory } from './routes/directory';
 import { email } from './routes/email';
@@ -49,6 +51,8 @@ app.route('/api/reports', reports);
 app.route('/api', attention);
 app.route('/api/email', email);
 app.route('/api/properties', properties);
+app.route('/api/announcements', announcements);
+app.route('/api/claims', claims);
 
 app.notFound(c => (c.req.path.startsWith('/api/') ? c.json({ error: 'Not found.' }, 404) : c.env.ASSETS ? c.env.ASSETS.fetch(c.req.raw) : c.text('Not found.', 404)));
 

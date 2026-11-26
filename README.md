@@ -19,6 +19,8 @@ Rebuilt in October 2026 from *Momentum Complete Website Handoff* (Box › W Mome
 - Every route checks access itself (`src/worker/policy.ts`), whether or not the menu shows it. Firm activity is hidden from the audit log for staff without JD&Co access.
 - **Marketing** pages and their API (`/api/marketing/*`, marketing expenses) need the Marketing division. Marketing programs can also be limited to JD&Co staff or to administrators.
 - **Team work** is open to every active member, but only administrators can approve or publish work, or move it back out of Approved or Published. Linking work to a campaign needs Marketing access. A work item can be assigned to several people (all active members when added); each of them sees it under Mine, gets its due-date alerts and has it counted in their staff updates.
+- **Announcements** (Team): every active member reads them; only administrators post, edit, pin and archive. Each person's reads are recorded; unread announcements show a count beside Announcements in the menu and an alert in the attention centre until marked read (marking the alert read counts). Administrators can see who has read each one.
+- **Expense claims** (Team): anyone submits a charge they paid (date, amount, company, Credit card with card type and last four digits only, or E-transfer, description, notes) with the invoice uploaded (PDF, JPG, PNG, WebP or HEIC, up to 8 MB, checked by file contents; up to 5 files). Invoices are stored in the database, so backups include them. A claim can be tagged to a division the submitter has. The submitter sees their own; administrators see and review claims for their divisions (the Owner sees all) and get an alert for each one waiting. Only the Owner can review her own claims. Declining needs a reason. The submitter can edit, add files or withdraw only until it's reviewed. Migration `0008_announcements_expense_claims.sql`.
 - **Staff updates**: each person writes only their own. Drafts are private; administrators see only that a draft exists. The Owner reviews everyone's submitted updates; administrators review ordinary Members' only, and firm updates only with JD&Co access. Editing an update clears its review. Days and Monday-to-Sunday weeks follow America/New_York.
 - **Attention centre**: alerts come only from work the person can see. Read, dismissed and snoozed are per person; snoozes end on their business date. Members create reminders for themselves; firm reminders need JD&Co access for both the creator and the assignee. Firm dates on the team calendar are opt-in and need JD&Co access.
 - **Email**: each business has its own list. A list needs Marketing plus that business's division (so the JD&Co and JD Publishing lists need Owner-granted access). Staff add people one at a time with consent evidence, write drafts and send tests to themselves; administrators import, change sender settings, and send, schedule, pause or cancel. Unsubscribes are per business; hard bounces and spam complaints block an address for every business, and a complaint can never be unblocked. Someone who unsubscribed can only be re-added with new express consent dated after they left.
@@ -36,7 +38,7 @@ The sidebar footer has a **View as** switcher (local only) for checking what eac
 ## Tests
 
 ```bash
-npm test        # 75 API tests against a fresh in-memory database
+npm test        # 104 API tests against a fresh in-memory database
 npm run check   # TypeScript
 npm run build   # web app (dist/client) and bundled server (dist/server/main.mjs)
 npm start       # run the built server

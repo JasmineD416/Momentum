@@ -2,6 +2,7 @@ import type { MiddlewareHandler } from 'hono';
 import { DIVISION_IDS } from '../shared/constants';
 import type { AppEnv, Env } from './env';
 import { SESSION_COOKIE, signInReady } from './google';
+import { MAX_INVOICE_BYTES } from './routes/claims';
 import { unseal } from './session';
 import { fail, memberFromRow, newId, nowIso } from './util';
 
@@ -51,9 +52,17 @@ export const sameOriginJson: MiddlewareHandler<AppEnv> = async (c, next) => {
   if (!['GET', 'HEAD', 'OPTIONS'].includes(c.req.method)) {
     const origin = c.req.header('origin');
     if (origin && origin !== new URL(c.req.url).origin) fail(403, 'Requests must come from Momentum itself.');
-    if (!(c.req.header('content-type') || '').toLowerCase().startsWith('application/json')) fail(415, 'Send JSON.');
+    const type = (c.req.header('content-type') || '').toLowerCase();
     const len = Number(c.req.header('content-length') || 0);
-    if (len > 1024 * 1024) fail(413, 'That request is too large.');
+    // Invoice uploads are the one place a raw file is sent. They must name Momentum as their origin; a cross-site page
+    // can't send this content type without a preflight, which Momentum never approves.
+    if (c.req.method === 'POST' && /^\/api\/claims\/[^/]+\/invoices$/.test(c.req.path) && type.startsWith('application/octet-stream')) {
+      if (!origin) fail(403, 'Requests must come from Momentum itself.');
+      if (len > MAX_INVOICE_BYTES) fail(413, 'Invoices can be up to 8 MB.');
+    } else {
+      if (!type.startsWith('application/json')) fail(415, 'Send JSON.');
+      if (len > 1024 * 1024) fail(413, 'That request is too large.');
+    }
   }
   await next();
 };

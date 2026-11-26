@@ -24,6 +24,15 @@ export const api = {
   post: <T = any>(path: string, body: unknown = {}) => request<T>('POST', path, body),
   patch: <T = any>(path: string, body: unknown) => request<T>('PATCH', path, body),
   put: <T = any>(path: string, body: unknown) => request<T>('PUT', path, body),
+  /** Send one file as the raw request body (invoice uploads). */
+  async upload<T = any>(path: string, file: File): Promise<T> {
+    const headers: Record<string, string> = { accept: 'application/json', 'content-type': 'application/octet-stream', 'x-file-name': encodeURIComponent(file.name) };
+    if (import.meta.env.DEV && devUser.email) headers['x-dev-user'] = devUser.email;
+    const res = await fetch(path, { method: 'POST', headers, body: file, credentials: 'same-origin' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new ApiError(res.status, String((data as Record<string, unknown>).error || `The upload failed (${res.status}).`), data as Record<string, unknown>);
+    return data as T;
+  },
   /** Fetch a protected CSV and hand it to the browser as a download. */
   async download(path: string, filename: string) {
     const headers: Record<string, string> = {};

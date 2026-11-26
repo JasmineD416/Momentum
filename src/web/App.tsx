@@ -14,7 +14,9 @@ import { DivisionContacts } from './pages/Contacts';
 import { Folder } from './pages/Folder';
 import { Imports } from './pages/Imports';
 import { People } from './pages/People';
+import { Announcements } from './pages/Announcements';
 import { AttentionCentre } from './pages/Attention';
+import { ExpenseClaims } from './pages/Claims';
 import { TeamCalendar } from './pages/Calendar';
 import { CampaignDetail, Campaigns } from './pages/Campaigns';
 import { Companies, FollowUps, MarketingContactDetail, MarketingContacts } from './pages/Marketing';
@@ -31,7 +33,7 @@ type NavItem = { path: string; label: string } | { heading: string };
 type NavGroup = { title: string; division?: string; admin?: boolean; items: NavItem[] };
 
 const NAV: NavGroup[] = [
-  { title: 'Team', items: [{ path: 'overview', label: 'Overview' }, { path: 'attention', label: 'Attention centre' }, { path: 'team', label: 'Team workspace' }, { path: 'calendar', label: 'Team calendar' }, { path: 'updates', label: 'Staff updates' }] },
+  { title: 'Team', items: [{ path: 'overview', label: 'Overview' }, { path: 'announcements', label: 'Announcements' }, { path: 'attention', label: 'Attention centre' }, { path: 'team', label: 'Team workspace' }, { path: 'calendar', label: 'Team calendar' }, { path: 'updates', label: 'Staff updates' }, { path: 'claims', label: 'Expense claims' }] },
   { title: 'JD&Co Law Firm', division: 'jdco', items: [{ path: 'contacts/jdco', label: 'Contacts' }, { path: 'clients', label: 'Client directory' }, { path: 'pncs', label: 'PNC tracker' }, { path: 'counsel', label: 'Lawyer directory' }, { path: 'expenses', label: 'Client expenses' }] },
   { title: 'Marketing', division: 'marketing', items: [
     { heading: 'Relationships' }, { path: 'mk-contacts', label: 'Marketing contacts' }, { path: 'companies', label: 'Company directory' }, { path: 'opportunities', label: 'Opportunities' }, { path: 'follow-ups', label: 'Follow-ups' },
@@ -80,6 +82,8 @@ function route(me: Me, parts: string[]): { active: string; page: ReactNode } {
     case 'contacts': return { active: `contacts/${id}`, page: <DivisionContacts key={id} division={id} /> };
     case 'folder': return { active: `folder/${id}`, page: <Folder key={id} folderId={id} /> };
     case 'attention': return { active: 'attention', page: <AttentionCentre /> };
+    case 'announcements': return { active: 'announcements', page: <Announcements /> };
+    case 'claims': return { active: 'claims', page: <ExpenseClaims /> };
     case 'team': return { active: 'team', page: <TeamWorkspace /> };
     case 'calendar': return { active: 'calendar', page: <TeamCalendar /> };
     case 'updates': return { active: 'updates', page: <StaffUpdates /> };
@@ -113,6 +117,7 @@ function Shell({ me, members }: { me: Me; members: MemberLite[] }) {
   const toast = useToast();
   useEffect(() => setMenuOpen(false), [parts.join('/')]);
   const heroKey = allowed(me, parts[0] || 'overview', parts[1] || '') ? HERO[parts[0] || 'overview'] : undefined;
+  const unread = useUnreadAnnouncements(parts.join('/'));
   const groups = NAV.filter(g => (!g.division || hasDiv(me, g.division)) && (!g.admin || isAdmin(me)));
   return (
     <>
@@ -124,7 +129,7 @@ function Shell({ me, members }: { me: Me; members: MemberLite[] }) {
             <div className="navg" key={g.title}>
               <h4>{g.title}</h4>
               {g.items.map(i => 'heading' in i ? <div className="navsub" key={i.heading}>{i.heading}</div> : (
-                <a key={i.path} href={href(i.path)} className={i.path === active ? 'on' : undefined} aria-current={i.path === active ? 'page' : undefined}><span>{i.label}</span></a>
+                <a key={i.path} href={href(i.path)} className={i.path === active ? 'on' : undefined} aria-current={i.path === active ? 'page' : undefined}><span>{i.label}</span>{i.path === 'announcements' && unread > 0 && <span className="nav-badge" aria-label={`${unread} unread`}>{unread}</span>}</a>
               ))}
             </div>
           ))}
@@ -146,6 +151,20 @@ function Shell({ me, members }: { me: Me; members: MemberLite[] }) {
         onClose={() => setProfile(false)} onSubmit={async v => { await api.patch('/api/me', { title: v.title }); toast('Title saved.'); location.reload(); }} />}
     </>
   );
+}
+
+/** Unread announcements for the menu badge: checked on every page change, every minute, and when announcements change. */
+function useUnreadAnnouncements(page: string) {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    let live = true;
+    const check = () => api.get<{ unread: number }>('/api/announcements/unread').then(d => live && setN(d.unread), () => undefined);
+    check();
+    const t = setInterval(check, 60_000);
+    window.addEventListener('momentum:announcements', check);
+    return () => { live = false; clearInterval(t); window.removeEventListener('momentum:announcements', check); };
+  }, [page]);
+  return n;
 }
 
 async function signOut() {

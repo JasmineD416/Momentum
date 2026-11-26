@@ -124,10 +124,12 @@ export function Confirm({ title, text, label, onConfirm, onClose }: { title: str
 /* ---------------- Forms ---------------- */
 type Opt = string | [string, string];
 export type Field = {
-  k: string; l: string; t?: 'text' | 'email' | 'tel' | 'date' | 'datetime' | 'select' | 'textarea' | 'money' | 'check' | 'multi' | 'url' | 'number' | 'password' | 'h';
+  k: string; l: string; t?: 'text' | 'email' | 'tel' | 'date' | 'datetime' | 'select' | 'textarea' | 'money' | 'check' | 'multi' | 'url' | 'number' | 'password' | 'file' | 'h';
   o?: readonly Opt[]; req?: boolean; full?: boolean; help?: string; cl?: string; blank?: string | false; rows?: number;
   /** Money only: an empty box gives null ("not recorded") instead of 0. */
   nullable?: boolean;
+  /** File only: accepted types, as for <input accept>. */
+  accept?: string;
 };
 export type Values = Record<string, any>;
 
@@ -144,6 +146,7 @@ function FieldInput({ f, v, set }: { f: Field; v: any; set: (v: any) => void }) 
   let input: ReactNode;
   if (f.t === 'select') input = <select id={id} value={v ?? ''} onChange={e => set(e.target.value)} aria-required={f.req}>{f.blank !== false && <option value="">{f.blank || '—'}</option>}{opts.map(([val, txt]) => <option key={val} value={val}>{txt}</option>)}</select>;
   else if (f.t === 'textarea') input = <textarea id={id} rows={f.rows ?? 3} value={v ?? ''} onChange={e => set(e.target.value)} />;
+  else if (f.t === 'file') input = <input id={id} type="file" accept={f.accept} onChange={e => set(e.target.files?.[0] ?? null)} />;
   else if (f.t === 'money') input = <input id={id} inputMode="decimal" placeholder="0.00" value={v ?? ''} onChange={e => set(e.target.value)} />;
   else input = <input id={id} type={f.t === 'datetime' ? 'datetime-local' : f.t === 'url' ? 'url' : f.t ?? 'text'} value={v ?? ''} onChange={e => set(e.target.value)} autoComplete={f.t === 'password' ? 'new-password' : undefined} />;
   return <div className={`field${f.full || f.t === 'textarea' ? ' full' : ''}`}>{label}{input}{help}</div>;

@@ -209,3 +209,9 @@ dialog .err:not(:empty){padding-bottom:8px}
   .fgrid{grid-template-columns:1fr}
   .toolbar input[type=search]{min-width:0;max-width:none;width:100%}
 }
+
+/* Announcements */
+.nav-badge{min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--pink);color:#fff;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.announcement.unread{border-left:4px solid var(--pink);background:var(--tint)}
+.ann-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.ann-body{white-space:pre-wrap;line-height:1.6}

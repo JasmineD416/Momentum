@@ -54,6 +54,23 @@ attention.get('/attention', async c => {
     if (due.weekly && !results.some(r => r.kind === 'weekly' && r.period_start === due.weekStart))
       alerts.push({ key: `report:weekly:${due.weekStart}`, kind: 'Staff update', title: 'Submit this week’s update', detail: `Week of ${due.weekStart}`, date: today, link: 'updates' });
   }
+  // Announcements this person hasn't read yet. Reading one (Announcements › Mark as read) clears the alert.
+  const { results: news } = await db.prepare(`SELECT a.id, a.title, a.posted_at, p.name AS posted_by FROM announcements a LEFT JOIN members p ON p.id = a.posted_by
+    WHERE a.status = 'Published' AND NOT EXISTS (SELECT 1 FROM announcement_reads r WHERE r.announcement_id = a.id AND r.member_id = ?)`).bind(m.id).all<Record<string, string>>();
+  for (const a of news) alerts.push({ key: `announcement:${a.id}`, kind: 'New announcement', title: a.title, detail: a.posted_by ? `From ${a.posted_by}` : '', date: a.posted_at.slice(0, 10), link: 'announcements' });
+  // Expense claims: waiting for review (administrators who can review them), and the submitter's own claims reviewed in the last 14 days.
+  const { results: claimRows } = await db.prepare(`SELECT e.id, e.member_id, e.division, e.company, e.amount_cents, e.currency, e.status, e.charge_date, e.reviewed_at, s.name AS member_name
+    FROM team_expenses e JOIN members s ON s.id = e.member_id WHERE (e.status = 'Submitted' AND ?1) OR (e.member_id = ?2 AND e.status <> 'Submitted' AND e.reviewed_at >= ?3)`)
+    .bind(isAdmin(m), m.id, new Date(Date.now() - 14 * 86400000).toISOString()).all<Record<string, string>>();
+  for (const e of claimRows) {
+    const amount = `${(Number(e.amount_cents) / 100).toFixed(2)} ${e.currency}`;
+    if (e.status === 'Submitted') {
+      if ((e.member_id !== m.id || m.role === 'Owner') && (!e.division || hasDivision(m, e.division)))
+        alerts.push({ key: `claim-review:${e.id}`, kind: 'Expense to review', title: `${e.company}, ${amount}`, detail: `Submitted by ${e.member_name}`, date: e.charge_date, link: 'claims' });
+    } else if (e.member_id === m.id) {
+      alerts.push({ key: `claim-reviewed:${e.id}:${e.status}`, kind: 'Expense claim', title: `${e.company}, ${amount}`, detail: e.status, date: e.reviewed_at.slice(0, 10), link: 'claims' });
+    }
+  }
   const { results: rem } = await db.prepare("SELECT id, title, notes, due_date, scope FROM reminders WHERE assignee_id = ? AND status = 'Open' AND due_date <= ?").bind(m.id, today).all<Record<string, string>>();
   for (const r of rem) if (r.scope !== 'firm' || hasFirm(m)) alerts.push({ key: `reminder:${r.id}`, kind: 'Reminder', title: r.title, detail: r.notes, date: r.due_date, link: 'attention' });
 
@@ -75,6 +92,13 @@ attention.post('/attention/state', async c => {
   const v = await body(c, z.object({ key: z.string().min(3).max(300), state: z.enum(['read', 'dismissed', 'snoozed', 'clear']), snoozeUntil: dateStr.optional() }));
   const today = reportAlertsDue().today;
   if (v.state === 'snoozed' && (!v.snoozeUntil || v.snoozeUntil <= today)) fail(400, 'Snooze until a later date.');
+  // Marking an announcement alert read (or dismissing it) counts as reading the announcement.
+  const ann = /^announcement:([\w-]+)$/.exec(v.key)?.[1];
+  if (ann && (v.state === 'read' || v.state === 'dismissed')) {
+    await c.env.DB.prepare(`INSERT INTO announcement_reads (announcement_id, member_id, read_at) SELECT id, ?, ? FROM announcements WHERE id = ? AND status = 'Published' ON CONFLICT DO NOTHING`)
+      .bind(m.id, nowIso(), ann).run();
+    return c.json({ ok: true });
+  }
   if (v.state === 'clear') await c.env.DB.prepare('DELETE FROM alert_states WHERE member_id = ? AND alert_key = ?').bind(m.id, v.key).run();
   else await c.env.DB.prepare(`INSERT INTO alert_states (member_id, alert_key, state, snooze_until, updated_at) VALUES (?, ?, ?, ?, ?)
       ON CONFLICT (member_id, alert_key) DO UPDATE SET state = excluded.state, snooze_until = excluded.snooze_until, updated_at = excluded.updated_at`)

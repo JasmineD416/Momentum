@@ -138,3 +138,8 @@ export function utmUrl(landing: string, p: { source?: string; medium?: string; c
   }
   return u.toString();
 }
+
+/* Team › Expense claims */
+export const CLAIM_PAY_METHODS = ['Credit card', 'E-transfer'] as const;
+export const CARD_TYPES = ['Visa', 'Mastercard', 'American Express', 'Other'] as const;
+export const CLAIM_STATUSES = ['Submitted', 'Approved', 'Declined', 'Reimbursed'] as const;
