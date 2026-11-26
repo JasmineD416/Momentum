@@ -42,7 +42,7 @@ const NAV: NavGroup[] = [
     title: d.name, division: d.id,
     items: [{ path: `contacts/${d.id}`, label: 'Contacts' }, ...FOLDERS.filter(f => f.division === d.id).map(f => ({ path: `folder/${f.id}`, label: f.name }))],
   })),
-  { title: 'Properties', division: 'properties', items: [{ path: 'properties', label: 'Properties' }] },
+  { title: 'Properties', division: 'properties', items: [{ path: 'properties', label: 'Properties' }, { path: 'contacts/properties', label: 'Contacts' }] },
   { title: 'Administration', admin: true, items: [{ path: 'imports', label: 'Import records' }, { path: 'people', label: 'People and access' }] },
 ];
 

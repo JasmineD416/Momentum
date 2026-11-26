@@ -15,10 +15,12 @@ async function checkOwner(db: D1Database, ownerId: string | null, division: stri
 }
 
 /* ---------------- Division contacts ---------------- */
+/** Firm and Properties contact activity is hidden from the audit log for staff without that division. */
+const scopeOf = (division: string) => (division === 'jdco' ? 'firm' : division === 'properties' ? 'properties' : 'general') as 'firm' | 'properties' | 'general';
 const contactInput = z.object({
   division: z.enum(DIVISION_IDS as [string, ...string[]]),
   name: z.string().trim().min(1, 'is required').max(160), organization: text(200), role: text(160),
-  email: optEmail, phone: text(80), ownerId: z.string().nullable().default(null),
+  email: optEmail, phone: text(80), city: text(120), ownerId: z.string().nullable().default(null),
   nextAction: text(300), followUp: optDate, status: z.enum(['Active', 'Archived']).default('Active'), notes: text(4000),
   confirmDuplicate: z.boolean().optional(),
 });
@@ -43,10 +45,10 @@ directory.post('/contacts', async c => {
   const dup = await dupContact(c.env.DB, v);
   if (dup && !v.confirmDuplicate) fail(409, `${dup.name} already uses ${v.email} in this division. Confirm if that’s intentional.`);
   const id = newId(), t = nowIso();
-  await c.env.DB.prepare(`INSERT INTO div_contacts (id, division, name, organization, role, email, phone, owner_id, next_action, follow_up, status, notes, created_by, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-    .bind(id, v.division, v.name, v.organization, v.role, v.email, v.phone, v.ownerId, v.nextAction, v.followUp, v.status, v.notes, c.get('member').id, t, t).run();
-  await audit(c, 'Added contact', `${v.division}: ${v.name}`, v.division === 'jdco' ? 'firm' : 'general');
+  await c.env.DB.prepare(`INSERT INTO div_contacts (id, division, name, organization, role, email, phone, city, owner_id, next_action, follow_up, status, notes, created_by, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    .bind(id, v.division, v.name, v.organization, v.role, v.email, v.phone, v.city, v.ownerId, v.nextAction, v.followUp, v.status, v.notes, c.get('member').id, t, t).run();
+  await audit(c, 'Added contact', `${v.division}: ${v.name}`, scopeOf(v.division));
   return c.json({ id }, 201);
 });
 
@@ -59,10 +61,10 @@ directory.patch('/contacts/:id', async c => {
   await checkOwner(c.env.DB, v.ownerId, v.division);
   const dup = await dupContact(c.env.DB, v, c.req.param('id'));
   if (dup && !v.confirmDuplicate) fail(409, `${dup.name} already uses ${v.email} in this division. Confirm if that’s intentional.`);
-  const r = await c.env.DB.prepare(`UPDATE div_contacts SET name = ?, organization = ?, role = ?, email = ?, phone = ?, owner_id = ?, next_action = ?, follow_up = ?, status = ?, notes = ?, updated_at = ?, rev = rev + 1 WHERE id = ? AND rev = ?`)
-    .bind(v.name, v.organization, v.role, v.email, v.phone, v.ownerId, v.nextAction, v.followUp, v.status, v.notes, nowIso(), c.req.param('id'), v.rev).run();
+  const r = await c.env.DB.prepare(`UPDATE div_contacts SET name = ?, organization = ?, role = ?, email = ?, phone = ?, city = ?, owner_id = ?, next_action = ?, follow_up = ?, status = ?, notes = ?, updated_at = ?, rev = rev + 1 WHERE id = ? AND rev = ?`)
+    .bind(v.name, v.organization, v.role, v.email, v.phone, v.city, v.ownerId, v.nextAction, v.followUp, v.status, v.notes, nowIso(), c.req.param('id'), v.rev).run();
   assertUpdated(r, 'This contact');
-  await audit(c, 'Updated contact', `${v.division}: ${v.name}`, v.division === 'jdco' ? 'firm' : 'general');
+  await audit(c, 'Updated contact', `${v.division}: ${v.name}`, scopeOf(v.division));
   return c.json({ ok: true });
 });
 

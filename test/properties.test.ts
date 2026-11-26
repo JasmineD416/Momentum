@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import { beforeAll, describe, expect, it } from 'vitest';
 import type { Env } from '../src/worker/env';
 import { app } from '../src/worker/index';
@@ -40,7 +41,7 @@ describe('Properties access', () => {
   it('is closed to everyone without the Properties division, administrators included', async () => {
     const { data } = await post(OWNER, '/api/properties', property());
     for (const [m, p] of [['GET', '/api/properties'], ['GET', `/api/properties/${data.id}`], ['POST', '/api/properties'], ['PATCH', `/api/properties/${data.id}`],
-      ['POST', `/api/properties/${data.id}/tenants`], ['POST', `/api/properties/${data.id}/providers`]] as const) {
+      ['POST', `/api/properties/${data.id}/tenants`], ['GET', '/api/contacts?division=properties']] as const) {
       expect((await call(OTHER, m, p, m === 'GET' ? undefined : property())).status, `${m} ${p}`).toBe(403);
     }
   });
@@ -95,54 +96,44 @@ describe('Tenants', () => {
   });
 });
 
-describe('Service providers and stored passwords', () => {
-  let propertyId = '', providerId = '';
-  const provider = { name: 'Lee Contact', company: 'Example Hydro', services: 'Electricity', phone: '416-555-0123', email: 'billing@example.test', accountNumber: 'ACC-42', login: 'maple-account' };
+describe('Properties contacts', () => {
+  const contact = (over: Json = {}) => ({ division: 'properties', name: 'Sam Fixit', organization: 'Example Plumbing', role: 'Plumber', email: 'sam@example.test', phone: '416-555-0199', city: 'Mississauga', status: 'Active', ...over });
 
-  it('stores the password encrypted and never lists it', async () => {
-    propertyId = (await post(OWNER, '/api/properties', property({ name: 'Provider House' }))).data.id;
-    const r = await post(STAFF, `/api/properties/${propertyId}/providers`, { ...provider, password: 'Example-Passw0rd!' });
+  it('keeps a city on each contact and hides them from staff without Properties', async () => {
+    const r = await post(STAFF, '/api/contacts', contact());
     expect(r.status).toBe(201);
-    providerId = r.data.id;
-    const d = (await get(STAFF, `/api/properties/${propertyId}`)).data;
-    const listed = JSON.stringify(d);
-    expect(listed).not.toContain('Example-Passw0rd!');
-    expect(d.providers[0].hasPassword).toBe(true);
-    expect(d.providers[0]).not.toHaveProperty('passwordEnc');
-    const raw = await env.DB.prepare('SELECT password_enc FROM property_providers WHERE id = ?').bind(providerId).first<{ password_enc: string }>();
-    expect(raw!.password_enc.startsWith('v1.')).toBe(true);
-    expect(raw!.password_enc).not.toContain('Example-Passw0rd');
+    const list = (await get(STAFF, '/api/contacts?division=properties')).data.contacts as Json[];
+    expect(list.find(c => c.id === r.data.id)).toMatchObject({ city: 'Mississauga', organization: 'Example Plumbing', role: 'Plumber' });
+    expect((await post(OTHER, '/api/contacts', contact({ name: 'Not allowed' }))).status).toBe(403);
+    expect((await patch(STAFF, `/api/contacts/${r.data.id}`, { ...contact(), city: 'Oakville', rev: 1 })).status).toBe(200);
+    const again = (await get(STAFF, '/api/contacts?division=properties')).data.contacts as Json[];
+    expect(again.find(c => c.id === r.data.id)!.city).toBe('Oakville');
   });
 
-  it('shows a password only on request, to people with access, and logs each viewing', async () => {
-    expect((await post(OTHER, `/api/properties/${propertyId}/providers/${providerId}/password`)).status).toBe(403);
-    const r = await post(STAFF, `/api/properties/${propertyId}/providers/${providerId}/password`);
-    expect(r.status).toBe(200);
-    expect(r.data.password).toBe('Example-Passw0rd!');
-    const audit = (await get(OWNER, '/api/audit?limit=200')).data.audit as Json[];
-    expect(audit.some(a => a.action === 'Viewed provider password' && /Example Hydro/.test(a.entity) && a.scope === 'properties')).toBe(true);
+  it('keeps Properties contact activity out of the log for staff without the division', async () => {
+    await post(STAFF, '/api/contacts', contact({ name: 'Hidden Roofer', email: '' }));
+    const theirs = (await get(OTHER, '/api/audit?limit=200')).data.audit as Json[];
+    expect(theirs.some(a => /Hidden Roofer/.test(a.entity))).toBe(false);
+    const mine = (await get(STAFF, '/api/audit?limit=200')).data.audit as Json[];
+    expect(mine.some(a => /Hidden Roofer/.test(a.entity) && a.scope === 'properties')).toBe(true);
   });
 
-  it('keeps the password when edited without one, replaces it when given, and can remove it', async () => {
-    expect((await patch(STAFF, `/api/properties/${propertyId}/providers/${providerId}`, { ...provider, services: 'Electricity and water', rev: 1 })).status).toBe(200);
-    expect((await post(STAFF, `/api/properties/${propertyId}/providers/${providerId}/password`)).data.password).toBe('Example-Passw0rd!');
-    expect((await patch(STAFF, `/api/properties/${propertyId}/providers/${providerId}`, { ...provider, password: 'Second-Passw0rd', rev: 2 })).status).toBe(200);
-    expect((await post(STAFF, `/api/properties/${propertyId}/providers/${providerId}/password`)).data.password).toBe('Second-Passw0rd');
-    expect((await patch(STAFF, `/api/properties/${propertyId}/providers/${providerId}`, { ...provider, clearPassword: true, rev: 3 })).status).toBe(200);
-    expect((await post(STAFF, `/api/properties/${propertyId}/providers/${providerId}/password`)).status).toBe(404);
+  it('no longer has service providers on a property', async () => {
+    const id = (await post(STAFF, '/api/properties', property({ name: 'No Providers Ave' }))).data.id;
+    expect((await get(STAFF, `/api/properties/${id}`)).data).not.toHaveProperty('providers');
+    expect((await post(STAFF, `/api/properties/${id}/providers`, { name: 'x' })).status).toBe(404);
   });
 
-  it('won’t decrypt a password copied onto another provider', async () => {
-    const one = (await post(STAFF, `/api/properties/${propertyId}/providers`, { ...provider, company: 'One', password: 'pw-one-secret' })).data.id;
-    const two = (await post(STAFF, `/api/properties/${propertyId}/providers`, { ...provider, company: 'Two' })).data.id;
-    const { password_enc } = (await env.DB.prepare('SELECT password_enc FROM property_providers WHERE id = ?').bind(one).first<{ password_enc: string }>())!;
-    await env.DB.prepare('UPDATE property_providers SET password_enc = ? WHERE id = ?').bind(password_enc, two).run();
-    expect((await post(STAFF, `/api/properties/${propertyId}/providers/${two}/password`)).status).toBe(500);
-  });
-
-  it('refuses to store a password when the server has no encryption key, but saves everything else', async () => {
-    const noKey: Env = { ...env, DATA_ENCRYPTION_KEY: '' };
-    expect((await call(STAFF, 'POST', `/api/properties/${propertyId}/providers`, { ...provider, password: 'x-secret' }, noKey)).status).toBe(500);
-    expect((await call(STAFF, 'POST', `/api/properties/${propertyId}/providers`, { ...provider, company: 'No password Co' }, noKey)).status).toBe(201);
+  it('copies old service providers into Properties contacts, without passwords', async () => {
+    const pid = (await post(STAFF, '/api/properties', property({ name: 'Copy St' }))).data.id;
+    const t = new Date().toISOString();
+    await env.DB.prepare(`INSERT INTO property_providers (id, property_id, name, company, services, address, phone, email, account_number, login, password_enc, notes, status, created_at, updated_at)
+      VALUES ('prov-old', ?, 'Lee Contact', 'Example Hydro', 'Electricity', '1 Grid Rd', '416-555-0123', 'billing@example.test', 'ACC-42', 'maple-account', 'v1.secret', 'Call before noon', 'Former', ?, ?)`).bind(pid, t, t).run();
+    const sql = fs.readFileSync('migrations/0007_property_contacts.sql', 'utf8');
+    await env.DB.prepare(sql.slice(sql.indexOf('INSERT INTO div_contacts')).replace(/;\s*$/, '')).run();
+    const row = (await get(STAFF, '/api/contacts?division=properties')).data.contacts.find((c: Json) => c.id === 'prov-old');
+    expect(row).toMatchObject({ name: 'Lee Contact', organization: 'Example Hydro', role: 'Electricity', status: 'Archived' });
+    expect(row.notes).toBe('Property: Copy St\nAddress: 1 Grid Rd\nAccount number: ACC-42\nLogin: maple-account\n\nCall before noon');
+    expect(JSON.stringify(row)).not.toContain('v1.secret');
   });
 });

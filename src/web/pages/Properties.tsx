@@ -1,26 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { CURRENCIES } from '../../shared/constants';
 import { api } from '../api';
 import { fmtDate, money } from '../format';
 import { go, href } from '../router';
-import { copyText, DataTable, DefList, Ext, FormModal, Loaded, PageHead, Status, useLoad, useToast, type Field, type Values } from '../ui';
+import { DataTable, DefList, Ext, FormModal, Loaded, PageHead, Status, useLoad, useToast, type Field, type Values } from '../ui';
 
 type Property = {
   id: string; name: string; address: string; ownership: string; currency: string;
   purchaseDate: string; purchasePriceCents: number | null; soldDate: string; soldPriceCents: number | null;
   pmName: string; pmAddress: string; pmEmail: string; pmPhone: string; craBusinessNumber: string;
   mortgageCompany: string; loanNumber: string; insurer: string; policyNumber: string;
-  status: string; notes: string; rev: number; currentTenants?: number; activeProviders?: number;
+  status: string; notes: string; rev: number; currentTenants?: number;
 };
 type Tenant = {
   id: string; name: string; unit: string; email: string; phone: string; emergencyContact: string; leaseStart: string; leaseEnd: string;
   rentCents: number | null; rentFrequency: string; rentDueDay: string; depositCents: number | null; leaseLink: string; leaseNotes: string; status: string; rev: number;
 };
-type Provider = {
-  id: string; name: string; company: string; services: string; address: string; phone: string; email: string; accountNumber: string; login: string;
-  hasPassword: boolean; notes: string; status: string; rev: number;
-};
-
 const amount = (c: number | null, cur: string) => (c === null || c === undefined ? '' : money(c, cur));
 const mail = (e: string) => (e ? <a href={`mailto:${e}`}>{e}</a> : '');
 const tel = (p: string) => (p ? <a href={`tel:${p.replace(/[^\d+]/g, '')}`}>{p}</a> : '');
@@ -72,7 +67,7 @@ export function Properties() {
   const [showAll, setShowAll] = useState(false);
   return (
     <>
-      <PageHead title="Properties" sub="Each property with its ownership, purchase and sale, manager, mortgage and insurance, plus its tenants and service providers. Only people Jasmine gives Properties access can see this."
+      <PageHead title="Properties" sub="Each property with its ownership, purchase and sale, manager, mortgage and insurance, plus its tenants. Service providers and other people are in Properties › Contacts. Only people Jasmine gives Properties access can see this."
         actions={<button className="btn primary" onClick={() => setAdding(true)}>Add property</button>} />
       <Loaded state={list}>{d => {
         const rows = d.properties.filter(p => showAll || p.status === 'Active');
@@ -87,7 +82,6 @@ export function Properties() {
                 { label: 'Purchased', render: p => p.purchaseDate ? <>{fmtDate(p.purchaseDate)}<div className="muted">{amount(p.purchasePriceCents, p.currency)}</div></> : '—' },
                 { label: 'Manager', render: p => p.pmName || '—' },
                 { label: 'Tenants', num: true, render: p => p.currentTenants ?? 0 },
-                { label: 'Providers', num: true, render: p => p.activeProviders ?? 0 },
                 { label: 'Status', render: p => <Status s={p.status} /> },
               ]} />
           </>
@@ -112,43 +106,14 @@ const TENANT_FIELDS: Field[] = [
   { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Current', 'Former'] },
 ];
 
-const PROVIDER_FIELDS = (existing: boolean): Field[] => [
-  { k: 'h1', l: 'Service provider', t: 'h' },
-  { k: 'name', l: 'Contact name', req: true }, { k: 'company', l: 'Company' },
-  { k: 'services', l: 'Services', full: true, help: 'e.g. "Snow removal and lawn care", "Hydro", "Property tax".' },
-  { k: 'phone', l: 'Phone', t: 'tel' }, { k: 'email', l: 'Email', t: 'email' },
-  { k: 'address', l: 'Address', full: true },
-  { k: 'h2', l: 'Account', t: 'h' },
-  { k: 'accountNumber', l: 'Account number' }, { k: 'login', l: 'Login (username or email)' },
-  { k: 'password', l: existing ? 'New password' : 'Password', t: 'password', help: existing ? 'Leave empty to keep the stored password.' : 'Stored encrypted. Viewing it later is recorded in the activity log.' },
-  ...(existing ? [{ k: 'clearPassword', l: 'Stored password', t: 'check', cl: 'Remove the stored password' } as Field] : []),
-  { k: 'notes', l: 'Notes', t: 'textarea' },
-  { k: 'status', l: 'Status', t: 'select', blank: false, o: ['Active', 'Former'] },
-];
-
-function PasswordCell({ propertyId, p }: { propertyId: string; p: Provider }) {
-  const toast = useToast();
-  const [shown, setShown] = useState<string | null>(null);
-  useEffect(() => { if (shown === null) return; const t = setTimeout(() => setShown(null), 30_000); return () => clearTimeout(t); }, [shown]);
-  if (!p.hasPassword) return <span className="muted">—</span>;
-  const reveal = async () => {
-    try { setShown((await api.post<{ password: string }>(`/api/properties/${propertyId}/providers/${p.id}/password`, {})).password); }
-    catch (e) { toast((e as Error).message); }
-  };
-  return shown === null
-    ? <button className="btn sm" onClick={reveal}>Show</button>
-    : <span className="pw"><code>{shown}</code> <button className="btn sm" onClick={() => copyText(shown, toast)}>Copy</button> <button className="btn sm ghost" onClick={() => setShown(null)}>Hide</button></span>;
-}
-
 export function PropertyDetail({ id }: { id: string }) {
   const toast = useToast();
-  const data = useLoad(() => api.get<{ property: Property; tenants: Tenant[]; providers: Provider[] }>(`/api/properties/${id}`), [id]);
+  const data = useLoad(() => api.get<{ property: Property; tenants: Tenant[] }>(`/api/properties/${id}`), [id]);
   const [editing, setEditing] = useState(false);
   const [tenant, setTenant] = useState<Tenant | 'new' | null>(null);
-  const [provider, setProvider] = useState<Provider | 'new' | null>(null);
   const [showFormer, setShowFormer] = useState(false);
   return (
-    <Loaded state={data}>{({ property: p, tenants, providers }) => (
+    <Loaded state={data}>{({ property: p, tenants }) => (
       <>
         <PageHead title={p.name} sub={p.address} crumb={<a href={href('properties')}>← Properties</a>}
           actions={<button className="btn" onClick={() => setEditing(true)}>Edit property</button>} />
@@ -168,7 +133,7 @@ export function PropertyDetail({ id }: { id: string }) {
           {p.notes && <><h4 style={{ margin: '16px 0 6px' }}>Notes</h4><p style={{ whiteSpace: 'pre-wrap', margin: 0 }}>{p.notes}</p></>}
         </section>
 
-        <label className="chk" style={{ margin: '4px 0 10px' }}><input type="checkbox" checked={showFormer} onChange={e => setShowFormer(e.target.checked)} /> Show former tenants and providers</label>
+        <label className="chk" style={{ margin: '4px 0 10px' }}><input type="checkbox" checked={showFormer} onChange={e => setShowFormer(e.target.checked)} /> Show former tenants</label>
 
         <section className="card">
           <h3>Tenants <button className="btn sm primary" onClick={() => setTenant('new')}>Add tenant</button></h3>
@@ -185,20 +150,6 @@ export function PropertyDetail({ id }: { id: string }) {
             ]} />
         </section>
 
-        <section className="card">
-          <h3>Service providers <button className="btn sm primary" onClick={() => setProvider('new')}>Add provider</button></h3>
-          <DataTable rows={providers.filter(s => showFormer || s.status === 'Active')} rowKey={s => s.id} empty="No service providers recorded for this property."
-            columns={[
-              { label: 'Provider', render: s => <><strong>{s.company || s.name}</strong>{s.company && <div className="muted">{s.name}</div>}</> },
-              { label: 'Services', render: s => s.services || '—' },
-              { label: 'Contact', render: s => <>{tel(s.phone) || '—'}<div className="muted">{mail(s.email)}</div></> },
-              { label: 'Account', render: s => s.accountNumber || '—' },
-              { label: 'Login', render: s => s.login || '—' },
-              { label: 'Password', render: s => <PasswordCell propertyId={p.id} p={s} /> },
-              { label: '', render: s => <div className="acts-cell"><button className="btn sm" onClick={() => setProvider(s)}>Edit</button></div> },
-            ]} />
-        </section>
-
         {editing && <PropertyForm editing={p} onClose={() => setEditing(false)} onSaved={() => data.reload()} />}
 
         {tenant && <FormModal title={tenant === 'new' ? 'Add tenant' : 'Edit tenant'} onClose={() => setTenant(null)}
@@ -212,19 +163,6 @@ export function PropertyDetail({ id }: { id: string }) {
             if (tenant === 'new') await api.post(`/api/properties/${p.id}/tenants`, payload);
             else await api.patch(`/api/properties/${p.id}/tenants/${tenant.id}`, { ...payload, rev: tenant.rev });
             toast('Tenant saved.'); data.reload();
-          }} />}
-
-        {provider && <FormModal title={provider === 'new' ? 'Add service provider' : 'Edit service provider'} onClose={() => setProvider(null)}
-          initial={provider === 'new' ? { status: 'Active' } : { ...provider, password: '' }} fields={PROVIDER_FIELDS(provider !== 'new' && provider.hasPassword)}
-          onSubmit={async v => {
-            const payload: Values = {
-              name: v.name, company: v.company ?? '', services: v.services ?? '', address: v.address ?? '', phone: v.phone ?? '', email: v.email ?? '',
-              accountNumber: v.accountNumber ?? '', login: v.login ?? '', notes: v.notes ?? '', status: v.status,
-            };
-            if (v.clearPassword) payload.clearPassword = true; else if (v.password) payload.password = v.password;
-            if (provider === 'new') await api.post(`/api/properties/${p.id}/providers`, payload);
-            else await api.patch(`/api/properties/${p.id}/providers/${provider.id}`, { ...payload, rev: provider.rev });
-            toast('Service provider saved.'); data.reload();
           }} />}
       </>
     )}</Loaded>
